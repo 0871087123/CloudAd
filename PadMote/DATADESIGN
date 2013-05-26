@@ -1,0 +1,25 @@
+Type(hx)	Function				Data				length
+0			No Change				No
+1			point to(x,y)			0x(xx)(yy)			2 byte
+2			write ASCII code		0x(xx)				1 byte
+3			blink start				oxff(time)			1 byte - 1byte
+			blink stop				0x(00)(00)
+4			cursor visible			0xff				1 byte
+			cursor invisible		0x00				
+5			auto scroll				0xff(direction)(time)
+														3 byte
+									left	0x00
+									write	0xff
+									delay per second
+			stop scroll				0x00(00)			1 byte
+6			clean					0x00				1 byte
+-(7)		create simble			0x(char)(char)		16 byte
+			and						0x()()
+			write					0x()()
+			it						0x()()
+									0x()()
+									0x()()
+									0x()()
+									0x()()
+									0x()()
+8			print					0x(string)			virable
