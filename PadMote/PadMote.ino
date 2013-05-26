@@ -3,7 +3,8 @@
 #include "PadMote.h"
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-char buffer[20];
+char buffer[60];
+int timeoutcount = 100;			//Serial timeout 0.5 second
 
 target function;
 
@@ -17,6 +18,10 @@ void setup() {
   function.roll = false;
   function.x = 0;
   function.y = 0;
+
+  /* low Led */
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 }
 
 void loop() {
@@ -24,23 +29,37 @@ void loop() {
 	{
 		if (function.function() != 0)
 		{
+			/* things comes wrong , should be alart */
+			lcd.display();
 			lcd.clear();
 			lcd.home();
-			/* things comes wrong , should be alart */
 			blink();
 		}
 	}
-	// set the cursor to column 0, line 1
-	// (note: line 1 is the second row, since counting begins with 0):
-	lcd.setCursor(0, 1);
-	// print the number of seconds since reset:
-	lcd.print(millis()/1000);
+}
+
+char readByte()
+{
+	int i = 0;
+	/* check the serial data per 5 miliseconds */
+	while (!Serial.available())
+	{
+		if (i > timeoutcount)
+		{
+			return 0;
+		}
+		delay(5);
+		i++;
+	}
+
+	return Serial.read();
 }
 
 unsigned long blink()
 {
+	int i;
 	pinMode(13, OUTPUT);
-	while (1)
+	for (i = 0; i < 2; i++)
 	{
 		digitalWrite(13, HIGH);
 		delay(1000);
@@ -48,15 +67,15 @@ unsigned long blink()
 		delay(1000);
 	}
 
-	return -1;
+	return 0;
 }
 
 unsigned long target::pointto()
 {
-	DBGA(Serial.read() == 2);
+	DBGA(readByte() == 0x02);	//data length is 2 byte
 
-	this->x = Serial.read();
-	this->y = Serial.read();
+	this->x = readByte();
+	this->y = readByte();
 
 	/* judge the data is valid */
 	DBGA((this->x < 16) && (this->x >= 0));
@@ -70,9 +89,9 @@ unsigned long target::pointto()
 
 unsigned long target::writebyte()
 {
-	DBGA(Serial.read() == 1);
+	DBGA(readByte() == 1);
 
-	this->data = Serial.read();
+	this->data = readByte();
 	lcd.write(this->data);
 
 	return 0;
@@ -80,16 +99,16 @@ unsigned long target::writebyte()
 
 unsigned long target::blink()
 {
-	DBGA(Serial.read() == 2);
+	DBGA(readByte() == 2);
 
-	if (Serial.read() == 0xff)
+	if (readByte() == 0xff)
 	{
-		this->time = (int) Serial.read();		//read blink time
+		this->time = (int) readByte();		//read blink time
 		lcd.blink();
 	}
-	else if(Serial.read() == 0)
+	else if(readByte() == 0)
 	{
-		(void) Serial.read();					//drop the data
+		(void) readByte();					//drop the data
 		lcd.noBlink();
 	}
 	else
@@ -102,13 +121,13 @@ unsigned long target::blink()
 
 unsigned long target::cursor()
 {
-	DBGA(Serial.read() == 1);
+	DBGA(readByte() == 1);
 
-	if (Serial.read() == 0xff)
+	if (readByte() == 0xff)
 	{
 		lcd.cursor();
 	}
-	else if (Serial.read() == 0x00)
+	else if (readByte() == 0x00)
 	{
 		lcd.noCursor();
 	}
@@ -124,29 +143,29 @@ unsigned long target::scroll()
 {
 	unsigned char way;
 
-	DBGA(Serial.read() == 3);
+	DBGA(readByte() == 3);
 
-	if (Serial.read() == 0xff)
+	if (readByte() == 0xff)
 	{
 		this->roll = true;
-		way = Serial.read();
+		way = readByte();
 
 		if (way == 0x00)
 		{
 			this->direction = 0;
 			lcd.scrollDisplayLeft();
 		}
-		else (way == 0xff)
+		else if (way == 0xff)
 		{
 			this->direction = 1;
 			lcd.scrollDisplayRight();
 		}
 		lcd.autoscroll();
 	}
-	else if (Serial.read() == 0)
+	else if (readByte() == 0)
 	{
 		this->roll = false;
-		(void) Serial.read();			//drop data
+		(void) readByte();			//drop data
 		lcd.noAutoscroll();
 	}
 	else
@@ -159,10 +178,28 @@ unsigned long target::scroll()
 
 unsigned long target::clean()
 {
-	DBGA(Serial.read() == 1);
-	DBGA(Serial.read() == 0);
+	DBGA(readByte() == 1);
+	DBGA(readByte() == 0);
 	lcd.clear();
 	lcd.home();
+
+	return 0;
+}
+
+unsigned long target::printf()
+{
+	unsigned char length = 0;
+	int i;
+	length = readByte();
+
+	DBGA(length <= 32);
+
+	for (i = 0; i < length; i++)
+	{
+		buffer[i] = readByte();
+	}
+
+	lcd.print(buffer);
 
 	return 0;
 }
@@ -170,21 +207,18 @@ unsigned long target::clean()
 unsigned long target::function()
 {
 	/* wait for data string */
-	buffer[0] = Serial.read();
-	while (buffer[0] == 0)
-	{
-		buffer[0] = Serial.read();
-	}
+	buffer[0] = readByte();
 	
 	switch (buffer[0])
 	{
-		case 0 : DBGA(0);
+		case 0 : return 0;
 		case 1 : return this->pointto();
 		case 2 : return this->writebyte();
 		case 3 : return this->blink();
 		case 4 : return this->cursor();
 		case 5 : return	this->scroll();
 		case 6 : return this->clean();
+		case 8 : return this->printf();
 
 		default :
 				 break;

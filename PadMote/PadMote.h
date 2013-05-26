@@ -14,4 +14,5 @@ class target
 	unsigned long cursor();
 	unsigned long scroll();
 	unsigned long clean();
+	unsigned long printf();
 };
