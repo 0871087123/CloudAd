@@ -1,10 +1,14 @@
 #include "basetype.h"
 
-class RaspConnector 
+class rasp_connector 
 {
-	int fd_sock;
+	INT fd_sock;
 	bool wired;
+	CHAR domainname[40];
+
 	private:
+		void rasp_connector();
+		void ~rasp_connector();
 		void wireto(UCHAR *hostname);
 		void TX(UCHAR *buffer, ULONG bufsize);
 		void RX(UCHAR *buffer, ULONG bufsize);
