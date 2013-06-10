@@ -14,10 +14,10 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = ..
+GTEST_DIR = /home/kent/gtest
 
 # Where to find user code.
-USER_DIR = ../samples
+USER_DIR = ..
 
 # Flags passed to the preprocessor.
 CPPFLAGS += -I$(GTEST_DIR)/include
@@ -72,9 +72,9 @@ gtest_main.a : gtest-all.o gtest_main.o
 dns.o : $(USER_DIR)/dns.cpp $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
 
-dns_test.o : $(USER_DIR)/dns_test.cc \
+dns_test.o : dns_test.cc \
                      $(USER_DIR)/dns.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns_test.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c dns_test.cc
 
 ut : dns.o dns_test.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
