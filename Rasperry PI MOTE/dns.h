@@ -2,14 +2,17 @@
 
 class rasp_connector 
 {
+	private:
 	INT fd_sock;
 	bool wired;
+
+	public:
 	CHAR domainname[40];
 
 	private:
-		void rasp_connector();
-		void ~rasp_connector();
-		void wireto(UCHAR *hostname);
+		rasp_connector();
+		~rasp_connector();
+		void wireto(CHAR *hostname);
 		void TX(UCHAR *buffer, ULONG bufsize);
 		void RX(UCHAR *buffer, ULONG bufsize);
 	public:

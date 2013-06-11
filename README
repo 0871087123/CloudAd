@@ -2,6 +2,7 @@
 
 NOTE:
 DNS解析用gethostbyname，学习使用！
+DNS解析链接函数完成，UT编写MAKEFILE完成。
 
 当前阶段：
 测试远端功能。

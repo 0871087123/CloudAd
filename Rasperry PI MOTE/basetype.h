@@ -9,6 +9,10 @@
 #define protected public
 #endif
 
+#ifdef __UT__
+//#error
+#endif
+
 typedef unsigned char UCHAR;
 typedef unsigned long ULONG;
 typedef unsigned int UINT;
@@ -18,4 +22,8 @@ typedef char CHAR;
 typedef long LONG;
 typedef int INT;
 typedef short SHORT;
+
+#ifndef AD_PORT 
+#define AD_PORT 43212
+#endif
 

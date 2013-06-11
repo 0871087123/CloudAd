@@ -20,7 +20,7 @@ GTEST_DIR = /home/kent/gtest
 USER_DIR = ..
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include
+CPPFLAGS += -I$(GTEST_DIR)/include -D__UT__
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -D__UT__
@@ -69,12 +69,14 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
+stub.o : stub/stub.h stub/stub.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stub/stub.c
+
 dns.o : $(USER_DIR)/dns.cpp $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
 
-dns_test.o : dns_test.cc \
-                     $(USER_DIR)/dns.h $(GTEST_HEADERS)
+dns_test.o : dns_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c dns_test.cc
 
-ut : dns.o dns_test.o gtest_main.a
+ut : dns.o dns_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread

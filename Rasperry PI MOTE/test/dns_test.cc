@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
+
 #include "../dns.h"
-#include "stub.h"
+#include "stub/stub.h"
 
 //stub function
 
@@ -28,7 +29,6 @@ void UT_DNS::TearDown()
 TEST_F(UT_DNS, 001)
 {
 	rasp_connector myrasp;
-
 	//检查初始化
 	EXPECT_EQ(-1, myrasp.fd_sock);
 	EXPECT_EQ(false, myrasp.wired);
@@ -37,10 +37,10 @@ TEST_F(UT_DNS, 001)
 	myrasp.wireto("www.skyteacher.net");
 
 	//检查连接结果
-	EXPECT_EQ(1, this->conect_t;
-	EXPECT_EQ(0, strcmp(this->addr, "192.168.1.101");
-	EXPECT_EQ(, myrasp.fd_sock);
-	EXPECT_EQ(true, myrasp.wired);	
+	EXPECT_EQ(1, this->conect_t);
+	EXPECT_EQ(0, strcmp(this->addr, "192.168.1.101"));
+	EXPECT_NE(-1, myrasp.fd_sock);
+	EXPECT_EQ(true, myrasp.wired);
 }
 
 //void stub_socket;
