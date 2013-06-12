@@ -1,6 +1,3 @@
-#ifndef __BASET__
-#define __BASET__
-
 #ifndef __UT__
 #define STATIC static
 #else
@@ -28,20 +25,5 @@ typedef short SHORT;
 
 #ifndef AD_PORT 
 #define AD_PORT 43212
-#define MAX_DATALEN 65535
 #endif
 
-#ifndef ___PARAIGNORE 
-#define PARAIGNORE(x) (void)x
-#define ___PARAIGNORE
-#endif
-
-struct tag_pack {
-	USHORT type;
-	USHORT length;
-	UCHAR data[MAX_DATALEN];
-};
-typedef struct tag_pack pack;
-
-
-#endif

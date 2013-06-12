@@ -39,11 +39,12 @@ rasp_connector::~rasp_connector()
 	return;
 }
 
-void rasp_connector::wireto(CHAR *hostname)
+void rasp_connector::wireto(const CHAR *hostname)
 {
 	struct hostent *host;
 	struct sockaddr_in addr;
 	struct sockaddr *sockaddr = (struct sockaddr *)&addr;
+	int i = 0;
 	int s_fd;
 
 	memset(&addr, 0, sizeof(addr));
@@ -53,11 +54,14 @@ void rasp_connector::wireto(CHAR *hostname)
 	if (host->h_addrtype != AF_INET)
 		return;
 
-	if (host->h_addr_list[0] != NULL)
+	while (host->h_addr_list[i] != NULL)
+	i++;
+
+	if (i > 0)
 	{
 		addr.sin_family = AF_INET;
 		addr.sin_port = AD_PORT;
-		addr.sin_addr.s_addr = *(host->h_addr_list[0]);
+		memcpy(&(addr.sin_addr.s_addr), host->h_addr_list[i - 1], sizeof(addr.sin_addr.s_addr));
 	}
 	else 
 	{
@@ -74,13 +78,13 @@ void rasp_connector::wireto(CHAR *hostname)
 		return ;
 	}
 
-	if (setsockopt(s_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(s_fd)))
+	if (setsockopt(s_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)))
 	{
 		perror("sockopt:SNTO");
 		return;
 	}
 
-	if (setsockopt(s_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(s_fd)))
+	if (setsockopt(s_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)))
 	{
 		perror("sockopt:RDTO");
 		return;
@@ -101,28 +105,51 @@ void rasp_connector::wireto(CHAR *hostname)
 }
 
 
-void rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
+ULONG rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
-		return;
+		return 0;
 
-	write(this->fd_sock, buffer, bufsize);
-
-	return;
+	return write(this->fd_sock, buffer, bufsize);
 }
 
 
-void rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
+ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
-		return ;
+		return 0;
 
-	read(this->fd_sock, buffer, bufsize);
-
-	return;
+	return read(this->fd_sock, buffer, bufsize);
 }
 
-bool rasp_connector::exchange(CHAR *hostname, CHAR *buffer, ULONG bufsize)
+bool rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
 {
+	ULONG length;
+
+	if (false != this->wired)
+	{
+		close(this->fd_sock);
+	}	
+
+	this->wireto(hostname);
+
+	if (true != this->wired)
+	{
+		return false;
+	}
+
+	length = this->TX(buffer, bufsize);
+	if (length <= 0)
+	{
+		perror("TX:");
+		return false;
+	}
+
+	length = this->RX(buffer, bufsize);
+	{
+		perror("RX:");
+		return false;
+	}
+
 	return true;
 }

@@ -12,9 +12,9 @@ class rasp_connector
 	private:
 		rasp_connector();
 		~rasp_connector();
-		void wireto(CHAR *hostname);
-		void TX(UCHAR *buffer, ULONG bufsize);
-		void RX(UCHAR *buffer, ULONG bufsize);
+		void wireto(const CHAR *hostname);
+		ULONG TX(UCHAR *buffer, ULONG bufsize);
+		ULONG RX(UCHAR *buffer, ULONG bufsize);
 	public:
-		bool exchange(CHAR *hostname, CHAR *buffer, ULONG bufsize);
+		bool exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize);
 };
