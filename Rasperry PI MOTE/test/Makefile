@@ -72,8 +72,14 @@ gtest_main.a : gtest-all.o gtest_main.o
 stub.o : stub/stub.h stub/stub.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stub/stub.c
 
+function.o : $(USER_DIR)/function.cpp $(USER_DIR)/function.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
+
 dns.o : $(USER_DIR)/dns.cpp $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
+
+function_test.o : function_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c function_test.cc
 
 dns_test.o : dns_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c dns_test.cc
