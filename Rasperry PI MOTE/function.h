@@ -13,7 +13,7 @@ class deamon
 	private:
 		UCHAR advertise[100];
 		ULONG ad_len;
-		ULONG saveAD();
+		ULONG acquire();
 		ULONG exchangeAD();
 
 	public:

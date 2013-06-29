@@ -4,3 +4,7 @@
  *	*/
 #include "basetype.h"
 
+class ar_serial{
+	public :
+		ULONG post();
+};
