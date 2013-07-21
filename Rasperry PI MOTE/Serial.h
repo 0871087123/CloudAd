@@ -4,6 +4,13 @@
  *	*/
 #include "basetype.h"
 
+/* only has 1 flag now */
+typedef enum tag_Flag {
+	flag_default = 0;
+	flag_print;
+	flag_butt;
+} AD_flag;
+
 class ar_serial{
 	public :
 		ULONG post();
