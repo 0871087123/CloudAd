@@ -23,7 +23,14 @@ extern "C" {
 
 STATIC struct timeval timeout;
 
-//init rasp_connector
+/*********************************************************
+*	Func Name   : rasp_connector::rasp_connector
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时42分50秒
+*	Description : Init Rasp connector
+*	              
+**********************************************************/
 rasp_connector::rasp_connector()
 {
 	this->fd_sock = -1;
@@ -34,11 +41,27 @@ rasp_connector::rasp_connector()
 	return;
 }
 
+/*********************************************************
+*	Func Name   : rasp_connector::~rasp_connector
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时43分24秒
+*	Description : Exit Rasp connector
+*	              
+**********************************************************/
 rasp_connector::~rasp_connector()
 {
 	return;
 }
 
+/*********************************************************
+*	Func Name   : rasp_connector::wireto
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时44分15秒
+*	Description : connect to host by hostname, save the
+*	              socket
+**********************************************************/
 void rasp_connector::wireto(const CHAR *hostname)
 {
 	struct hostent *host;
@@ -104,7 +127,14 @@ void rasp_connector::wireto(const CHAR *hostname)
 	return;
 }
 
-
+/*********************************************************
+*	Func Name   : rasp_connector::RX
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时45分20秒
+*	Description : send messages
+*	              
+**********************************************************/
 ULONG rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
@@ -114,6 +144,14 @@ ULONG rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
 }
 
 
+/*********************************************************
+*	Func Name   : rasp_connector::RX
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时45分20秒
+*	Description : receive messages
+*	              
+**********************************************************/
 ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
@@ -122,6 +160,14 @@ ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
 	return read(this->fd_sock, buffer, bufsize);
 }
 
+/*********************************************************
+*	Func Name   : rasp_connector::RX
+*	Project     : Cloud AD
+*	Author      : Kent
+*	Data        : 2013年08月06日 星期二 21时46分22秒
+*	Description : exchange cloud ad with server
+*	              
+**********************************************************/
 bool rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
 {
 	ULONG length;
