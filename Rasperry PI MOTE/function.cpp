@@ -42,29 +42,31 @@ deamon::deamon()
 	this->ad_len = 0;
 	this->rasp_connector = new rasp_connector();
 
-	try {
-		while (1)
-		{
-			if (0 != this->acquire())
+	while(1){
+		try {
+			while (1)
 			{
-				throw E_ACQINFO;
+				if (0 != this->acquire())
+				{
+					throw E_ACQINFO;
+				}
+				if (0 != this->AD_down(flag_print, this->))
+				{
+					throw E_DOWN;
+				}
+				sleep(10);
 			}
-			if (0 != this->AD_down(flag_print, this->))
-			{
-				throw E_DOWN;
-			}
-			sleep(10);
 		}
-	}
 
-	catch (ERRORNUM){
-		if (ERRORNUM < E_BUTT)
-		{
-			printf("%s : %s", "Error in process", ERRORSTR[ERRORNUM]);
-		}
-		else
-		{
-			printf("Error string load faild.\n");
+		catch (ERRORNUM){
+			if (ERRORNUM < E_BUTT)
+			{
+				printf("%s : %s", "Error in process", ERRORSTR[ERRORNUM]);
+			}
+			else
+			{
+				printf("Error string load faild.\n");
+			}
 		}
 	}
 
@@ -86,4 +88,42 @@ deamon::deamon()
 	delete this->rasp_connector;
 }
 
+/*********************************************************
+*	Func Name   : deamon::acquire
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年08月18日 星期日 13时55分30秒
+*	Description : pull words form server
+*	              
+**********************************************************/
+unsigned long deamon::acquire()
+{
+	rasp_connector *connector = this->rasp_connector;
+	bool result = false;
+	strncpy(this->advertise, "Get AD", sizeof(this->advertise));
+	result = connector->exchange("kent.skyteacher.net", this->advertise, sizeof(this->advertise));
 
+	if (true == result)
+	{
+		this->ad_len = 0;
+	}
+	else
+	{
+		this->ad_len = -1;
+	}
+
+	return this->ad_len;
+}
+
+/*********************************************************
+*	Func Name   : deamon::AD_down
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年08月18日 星期日 14时05分09秒
+*	Description : push words to the ardrino
+*	              
+**********************************************************/
+unsigned long deamon::AD_down(AD_flag flag, void *data)
+{
+
+}
