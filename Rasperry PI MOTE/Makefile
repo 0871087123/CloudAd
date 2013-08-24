@@ -3,5 +3,16 @@
 #main为主程序
 #logic为逻辑部分
 #test为UT单元测试，用于对其中各个部分的测试。
+CC = g++
+CXXFLAGS = -g
 
+RasDaemon : dns.o Serial.o main.o function.o
+	$(CC) $(CXXFLAGS) -o $@ $^
 
+dns.o : dns.cpp
+
+Serial.o : Serial.cpp
+
+function.o : function.cpp
+
+main.o : main.cpp

@@ -8,7 +8,7 @@
 #		需要在之前引用Serial.h
 */
 
-#incllude "basetype.h"
+#include "basetype.h"
 
 #define ADSIZE 100
 class deamon
@@ -18,7 +18,7 @@ class deamon
 		ULONG ad_len;							/* post信息的长度 */
 		ULONG acquire();						/* 从服务器下载post信息 */
 		ULONG AD_down(AD_flag, void *data);		/* 下传post信息到1602 */
-		class *rasp_connector;					/* 需要一个和服务器的连接器 */
+		rasp_connector *connector;					/* 需要一个和服务器的连接器 */
 
 	public:
 		deamon();								/* 创建deamon */

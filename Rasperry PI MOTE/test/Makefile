@@ -73,16 +73,22 @@ stub.o : stub/stub.h stub/stub.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stub/stub.c
 
 function.o : $(USER_DIR)/function.cpp $(USER_DIR)/function.h $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/function.cpp
+
+Serial.o : $(USER_DIR)/Serial.cpp $(USER_DIR)/Serial.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Serial.cpp
 
 dns.o : $(USER_DIR)/dns.cpp $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
 
-function_test.o : function_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
+function_test.o : function_test.cc $(USER_DIR)/function.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c function_test.cc
 
 dns_test.o : dns_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c dns_test.cc
 
-ut : dns.o dns_test.o stub.o gtest_main.a
+Serial_test.o : Serial_test.cc $(USER_DIR)/Serial.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Serial_test.cc
+
+ut : dns.o function.o Serial.o dns_test.o function_test.o Serial_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread

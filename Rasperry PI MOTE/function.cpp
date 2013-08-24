@@ -6,20 +6,23 @@
 *	Description : This file contain main loop of ths deamon
 *	              process
 **********************************************************/
-#include <iostream.h>
+#include <iostream>
 #include "basetype.h"
 #include "dns.h"
+#include "Serial.h"
 #include "function.h"
 #include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 typedef enum tagErrorNum {
 	E_INVALID = 0,
 	E_ACQINFO,
+	E_DOWN,
 	E_BUTT,
 }ERRORNUM;
 
-CHAR *ERRORSTR[] = 
+char *ERRORSTR[] = 
 {
 	"",		/* E_INVALID */
 	"Can't acquire information\n",				/* E_ACQINFO */
@@ -40,7 +43,8 @@ deamon::deamon()
 {
 	memset(this->advertise, 0, ADSIZE);
 	this->ad_len = 0;
-	this->rasp_connector = new rasp_connector();
+	this->connector = new rasp_connector();
+	ERRORNUM error_code = E_INVALID;
 
 	while(1){
 		try {
@@ -50,7 +54,7 @@ deamon::deamon()
 				{
 					throw E_ACQINFO;
 				}
-				if (0 != this->AD_down(flag_print, this->))
+				if (0 != this->AD_down(flag_print, this->advertise))
 				{
 					throw E_DOWN;
 				}
@@ -58,10 +62,10 @@ deamon::deamon()
 			}
 		}
 
-		catch (ERRORNUM){
-			if (ERRORNUM < E_BUTT)
+		catch (ERRORNUM error_code){
+			if (error_code < E_BUTT)
 			{
-				printf("%s : %s", "Error in process", ERRORSTR[ERRORNUM]);
+				printf("%s : %s", "Error in process", ERRORSTR[error_code]);
 			}
 			else
 			{
@@ -81,11 +85,11 @@ deamon::deamon()
 *	Description : this function delete reference of main loop
 *	              in deamon process
 **********************************************************/
-~deamon::deamon()
+deamon::~deamon()
 {
 	memset(this->advertise, 0, ADSIZE);
 	this->ad_len = 0;
-	delete this->rasp_connector;
+	delete this->connector;
 }
 
 /*********************************************************
@@ -98,9 +102,9 @@ deamon::deamon()
 **********************************************************/
 unsigned long deamon::acquire()
 {
-	rasp_connector *connector = this->rasp_connector;
+	rasp_connector *connector = this->connector;
 	bool result = false;
-	strncpy(this->advertise, "Get AD", sizeof(this->advertise));
+	strncpy((char *)this->advertise, "Get AD", sizeof(this->advertise));
 	result = connector->exchange("kent.skyteacher.net", this->advertise, sizeof(this->advertise));
 
 	if (true == result)
