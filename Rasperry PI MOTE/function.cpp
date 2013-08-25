@@ -50,11 +50,11 @@ deamon::deamon()
 		try {
 			while (1)
 			{
-				if (0 != this->acquire())
+				if (0 == this->acquire())
 				{
 					throw E_ACQINFO;
 				}
-				if (0 != this->AD_down(flag_print, this->advertise))
+				if (0 == this->AD_down(flag_print, (char *)this->advertise))
 				{
 					throw E_DOWN;
 				}
@@ -103,17 +103,17 @@ deamon::~deamon()
 unsigned long deamon::acquire()
 {
 	rasp_connector *connector = this->connector;
-	bool result = false;
+	unsigned int result = false;
 	strncpy((char *)this->advertise, "Get AD", sizeof(this->advertise));
 	result = connector->exchange("kent.skyteacher.net", this->advertise, sizeof(this->advertise));
 
-	if (true == result)
+	if (0 == result)
 	{
 		this->ad_len = 0;
 	}
 	else
 	{
-		this->ad_len = -1;
+		this->ad_len = result;
 	}
 
 	return this->ad_len;
@@ -127,7 +127,18 @@ unsigned long deamon::acquire()
 *	Description : push words to the ardrino
 *	              
 **********************************************************/
-unsigned long deamon::AD_down(AD_flag flag, void *data)
+unsigned int deamon::AD_down(AD_flag flag, char *data)
 {
+	ar_serial *port = new ar_serial("");
+	unsigned int post_len = 0;
 
+	if (0 == this->ad_len)
+	{
+		return 0;
+	}	
+	post_len = port->post(this->ad_len, (char *)data);
+	if (this->ad_len != post_len)
+		return 0;
+	else
+		return post_len;
 }

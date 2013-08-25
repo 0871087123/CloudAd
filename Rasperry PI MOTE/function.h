@@ -17,7 +17,7 @@ class deamon
 		UCHAR advertise[ADSIZE];				/* 用于保存post信息 */
 		ULONG ad_len;							/* post信息的长度 */
 		ULONG acquire();						/* 从服务器下载post信息 */
-		ULONG AD_down(AD_flag, void *data);		/* 下传post信息到1602 */
+		unsigned int AD_down(AD_flag, char *data);		/* 下传post信息到1602 */
 		rasp_connector *connector;					/* 需要一个和服务器的连接器 */
 
 	public:

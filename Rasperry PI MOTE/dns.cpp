@@ -165,12 +165,12 @@ ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
 *	Project     : Cloud AD
 *	Author      : Kent
 *	Data        : 2013年08月06日 星期二 21时46分22秒
-*	Description : exchange cloud ad with server
-*	              
+*	Description : exchange cloud ad with server, return 
+*	              length of received adverstise
 **********************************************************/
-bool rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
+unsigned int rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
 {
-	ULONG length;
+	unsigned int length;
 
 	if (false != this->wired)
 	{
@@ -188,14 +188,14 @@ bool rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
 	if (length <= 0)
 	{
 		perror("TX:");
-		return false;
+		return 0;
 	}
 
 	length = this->RX(buffer, bufsize);
 	{
 		perror("RX:");
-		return false;
+		return 0;
 	}
 
-	return true;
+	return length;
 }

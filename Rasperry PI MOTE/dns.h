@@ -16,5 +16,5 @@ class rasp_connector
 		ULONG TX(UCHAR *buffer, ULONG bufsize);
 		ULONG RX(UCHAR *buffer, ULONG bufsize);
 	public:
-		bool exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize);
+		unsigned int exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize);
 };
