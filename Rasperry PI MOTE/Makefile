@@ -16,3 +16,6 @@ Serial.o : Serial.cpp
 function.o : function.cpp
 
 main.o : main.cpp
+
+clean :
+	rm -rf *.o

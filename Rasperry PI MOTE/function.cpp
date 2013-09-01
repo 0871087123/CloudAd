@@ -44,35 +44,6 @@ deamon::deamon()
 	memset(this->advertise, 0, ADSIZE);
 	this->ad_len = 0;
 	this->connector = new rasp_connector();
-	ERRORNUM error_code = E_INVALID;
-
-	while(1){
-		try {
-			while (1)
-			{
-				if (0 == this->acquire())
-				{
-					throw E_ACQINFO;
-				}
-				if (0 == this->AD_down(flag_print, (char *)this->advertise))
-				{
-					throw E_DOWN;
-				}
-				sleep(10);
-			}
-		}
-
-		catch (ERRORNUM error_code){
-			if (error_code < E_BUTT)
-			{
-				printf("%s : %s", "Error in process", ERRORSTR[error_code]);
-			}
-			else
-			{
-				printf("Error string load faild.\n");
-			}
-		}
-	}
 
 	return;
 }
@@ -90,6 +61,48 @@ deamon::~deamon()
 	memset(this->advertise, 0, ADSIZE);
 	this->ad_len = 0;
 	delete this->connector;
+}
+
+/*********************************************************
+*	Func Name   : deamon::startdeamon
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年09月01日 星期日 14时57分26秒
+*	Description : 启动守护进程
+*	              
+**********************************************************/
+void deamon::startdeamon()
+{
+	ERRORNUM error_code = E_INVALID;
+
+	while(1){
+		sleep(100);
+		try {
+			while (1)
+			{
+				if (0 == this->acquire())
+				{
+					throw E_ACQINFO;
+				}
+				if (0 == this->AD_down(flag_print, (char *)this->advertise))
+				{
+					throw E_DOWN;
+				}
+			}
+		}
+
+		catch (ERRORNUM error_code){
+			if (error_code < E_BUTT)
+			{
+				printf("%s : %s", "Error in process", ERRORSTR[error_code]);
+			}
+			else
+			{
+				printf("Error string load faild.\n");
+			}
+		}
+	}
+
 }
 
 /*********************************************************

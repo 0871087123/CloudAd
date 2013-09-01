@@ -72,11 +72,11 @@ TEST_F(UT_DNS, 001)
 	EXPECT_TRUE(false == myrasp.wired);
 
 	//连接域名
-	myrasp.wireto("pi.skyteacher.net");
+	myrasp.wireto("git.skyteacher.net");
 
 	//检查连接结果
 	EXPECT_EQ(1, conect_t);
-	EXPECT_EQ(0, strcmp(address_p, "192.168.1.102"));
+	EXPECT_EQ(0, strcmp(address_p, "192.168.1.101"));
 	EXPECT_NE(-1, myrasp.fd_sock);
 	EXPECT_EQ(true, myrasp.wired);
 	close(myrasp.fd_sock);

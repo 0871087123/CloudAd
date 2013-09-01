@@ -6,7 +6,7 @@
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 ADSIZE	function.h	13;"	d
 AD_PORT	basetype.h	30;"	d
-AD_down	function.cpp	/^unsigned long deamon::AD_down(AD_flag flag, void *data)$/;"	f	class:deamon
+AD_down	function.cpp	/^unsigned int deamon::AD_down(AD_flag flag, char *data)$/;"	f	class:deamon
 AD_flag	Serial.h	/^} AD_flag;$/;"	t	typeref:enum:tag_Flag
 CC	Makefile	/^CC = g++$/;"	m
 CHAR	basetype.h	/^typedef char CHAR;$/;"	t
@@ -56,7 +56,7 @@ data	test/stub/stub.h	/^	unsigned char data[10];$/;"	m	struct:fun_stub
 deamon	function.cpp	/^deamon::deamon()$/;"	f	class:deamon
 deamon	function.h	/^class deamon$/;"	c
 domainname	dns.h	/^	CHAR domainname[40];$/;"	m	class:rasp_connector
-exchange	dns.cpp	/^bool rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)$/;"	f	class:rasp_connector
+exchange	dns.cpp	/^unsigned int rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)$/;"	f	class:rasp_connector
 fd_sock	dns.h	/^	INT fd_sock;$/;"	m	class:rasp_connector
 flag_butt	Serial.h	/^	flag_butt,$/;"	e	enum:tag_Flag
 flag_default	Serial.h	/^	flag_default = 0,$/;"	e	enum:tag_Flag

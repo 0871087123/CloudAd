@@ -74,7 +74,7 @@ void rasp_connector::wireto(const CHAR *hostname)
 
 	host = gethostbyname(hostname);
 
-	if (host->h_addrtype != AF_INET)
+	if ((host == NULL) || (host->h_addrtype != AF_INET))
 		return;
 
 	while (host->h_addr_list[i] != NULL)

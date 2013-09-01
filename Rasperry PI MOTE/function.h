@@ -23,4 +23,5 @@ class deamon
 	public:
 		deamon();								/* 创建deamon */
 		~deamon();
+		void startdeamon();								/* 启动守护进程 */
 };
