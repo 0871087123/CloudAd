@@ -9,6 +9,7 @@ NOTE:
 
 当前阶段：
 准备迁移打桩工具到google mock。
+	学习google mock。
 实现并测试远端功能。
 编写终端守护进程。CS架构程序设计。
 
