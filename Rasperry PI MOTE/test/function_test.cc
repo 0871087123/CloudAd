@@ -50,8 +50,8 @@ TEST(deamon_normal, 001)
 	cont = 1;
 	deamon my_daemon;
 	stub_set(&stru_stub[0], (void *)sleep, (void *)stub_sleep);
-	stub_set(&stru_stub[1], (void *)&rasp_connector::exchange, (void *)stub_exchange);
-	stub_set(&stru_stub[2], (void *)&deamon::AD_down, (void *)stub_AD_down);
+	//stub_set(&stru_stub[1], (void *)my_daemon.connector->exchange, (void *)stub_exchange);
+	//stub_set(&stru_stub[2], (void *)my_daemon.AD_down, (void *)stub_AD_down);
 
 	ret = setjmp(tmp_jump_point);
 	jmp_point = &tmp_jump_point;
@@ -68,8 +68,8 @@ TEST(deamon_normal, 001)
 	}
 
 	stub_reset(&stru_stub[0]);
-	stub_reset(&stru_stub[1]);
-	stub_reset(&stru_stub[2]);
+	//stub_reset(&stru_stub[1]);
+	//stub_reset(&stru_stub[2]);
 }
 
 

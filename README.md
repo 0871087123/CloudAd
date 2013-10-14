@@ -8,12 +8,13 @@ post your ad to arudino via raspberry pi
 NOTE:
 
 当前阶段：
+需要重新按照面向对象的编程方法进行实现。
 准备迁移打桩工具到google mock。
-	学习google mock。
 实现并测试远端功能。
 编写终端守护进程。CS架构程序设计。
 
 已完成：
+简单学习google mock。
 完成简单ut脚本以及环境设置。
 组建gitlab ci环境，并且将项目添加到gitlab的ci环境中。组建完成，准备尝试ut
 版本管理迁移到gitlab
