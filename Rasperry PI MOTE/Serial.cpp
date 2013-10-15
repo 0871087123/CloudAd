@@ -11,40 +11,40 @@
 #include "Serial.h"
 
 /*********************************************************
-*	Func Name   : ar_serial::post
+*	Func Name   : arduino_lcd::post
 *	Project     : Cloud_AD
 *	Author      : Kent
 *	Data        : 2013年08月24日 星期六 14时17分28秒
 *	Description : posting advertise to arduino
 *	              
 **********************************************************/
-unsigned int ar_serial::post(int data_len, char *data)
+unsigned int arduino_lcd::post(int data_len, char *data)
 {
 	return 0;
 }
 
 /*********************************************************
-*	Func Name   : ar_serial::ar_serial
+*	Func Name   : arduino_lcd::arduino_lcd
 *	Project     : Cloud_AD
 *	Author      : Kent
 *	Data        : 2013年08月24日 星期六 14时18分46秒
 *	Description : create a serial connection to 
 *	              arduino
 **********************************************************/
-ar_serial::ar_serial(char *Port_name)
+arduino_lcd::arduino_lcd(char *Port_name)
 {
 	return ;
 }
 
 /*********************************************************
-*	Func Name   : ar_serial::~ar_serial
+*	Func Name   : arduino_lcd::~arduino_lcd
 *	Project     : Cloud_AD
 *	Author      : Kent
 *	Data        : 2013年08月24日 星期六 14时19分31秒
 *	Description : shutdown the connection to arduino
 *	              
 **********************************************************/
-ar_serial::~ar_serial()
+arduino_lcd::~arduino_lcd()
 {
 	return;
 }

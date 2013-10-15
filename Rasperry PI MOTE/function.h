@@ -11,17 +11,22 @@
 #include "basetype.h"
 
 #define ADSIZE 100
+#define PORTNAME_LEN 200
+#define SERVER_NAME_LEN 100
+
 class deamon
 {
 	private:
 		UCHAR advertise[ADSIZE];				/* 用于保存post信息 */
+		char serial_name[PORTNAME_LEN];			/* 当前串口位置 */
+		char server_name[SERVER_NAME_LEN];		/* 当前使用的服务器名 */
 		ULONG ad_len;							/* post信息的长度 */
 		ULONG acquire();						/* 从服务器下载post信息 */
-		unsigned int AD_down(AD_flag, char *data);		/* 下传post信息到1602 */
-		rasp_connector *connector;					/* 需要一个和服务器的连接器 */
+		arduino_lcd *lcd_downloader;			/* 1602lcd液晶屏 */
+		rasp_connector *connector;				/* 需要一个和服务器的连接器 */
 
 	public:
-		deamon();								/* 创建deamon */
-		~deamon();
-		void startdeamon();								/* 启动守护进程 */
+		deamon(char *arglist[]);				/* 创建deamon */
+		~deamon();								/* 销毁daemon */
+		void startdeamon();		/* 启动守护进程 */
 };

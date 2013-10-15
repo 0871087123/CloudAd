@@ -15,10 +15,10 @@ typedef enum tag_Flag {
 	flag_butt,
 } AD_flag;
 
-class ar_serial{
+class arduino_lcd{
 	public :
-		ar_serial(char *Port_name);
-		~ar_serial();
+		arduino_lcd(char *Port_name);
+		~arduino_lcd();
 		unsigned int post(int data_len, char *data);
 };
 

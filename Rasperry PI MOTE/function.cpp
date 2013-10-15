@@ -36,14 +36,25 @@ char *ERRORSTR[] =
 *	Author      : Kent
 *	Data        : 2013年08月06日 星期二 21时04分17秒
 *	Description : this function is main loop of deamon process
-*	              in raspberry pi mod
+*	              in raspberry pi mod，输入一个参数，第一个
+*	              为服务器名，第二个为本地串口路径
 **********************************************************/
 using namespace std;
-deamon::deamon()
+deamon::deamon(char *arglist[])
 {
-	memset(this->advertise, 0, ADSIZE);
+	/* 数据初始化 */
 	this->ad_len = 0;
+	memset(this->advertise, 0, ADSIZE);
+	memset(this->server_name, 0, SERVER_NAME_LEN);
+	memset(this->serial_name, 0, PORTNAME_LEN);
+
+	/* 存储配置数据 */
+	strcpy(this->server_name, arglist[0]);
+	strcpy(this->serial_name, arglist[1]);
+
+	/* 创建各种连接 */
 	this->connector = new rasp_connector();
+	this->lcd_downloader = new arduino_lcd(arglist[1]);
 
 	return;
 }
@@ -60,7 +71,12 @@ deamon::~deamon()
 {
 	memset(this->advertise, 0, ADSIZE);
 	this->ad_len = 0;
-	delete this->connector;
+	if (NULL != this->connector)
+		delete this->connector;
+	if (NULL != this->lcd_downloader)
+		delete this->lcd_downloader;
+
+	return;
 }
 
 /*********************************************************
@@ -84,7 +100,7 @@ void deamon::startdeamon()
 				{
 					throw E_ACQINFO;
 				}
-				if (0 == this->AD_down(flag_print, (char *)this->advertise))
+				if (0 == this->lcd_downloader->post(flag_print, (char *)this->advertise))
 				{
 					throw E_DOWN;
 				}
@@ -118,7 +134,7 @@ unsigned long deamon::acquire()
 	rasp_connector *connector = this->connector;
 	unsigned int result = false;
 	strncpy((char *)this->advertise, "Get AD", sizeof(this->advertise));
-	result = connector->exchange("kent.skyteacher.net", this->advertise, sizeof(this->advertise));
+	result = connector->exchange(this->server_name, this->advertise, sizeof(this->advertise));
 
 	if (0 == result)
 	{
@@ -132,26 +148,3 @@ unsigned long deamon::acquire()
 	return this->ad_len;
 }
 
-/*********************************************************
-*	Func Name   : deamon::AD_down
-*	Project     : Cloud_AD
-*	Author      : Kent
-*	Data        : 2013年08月18日 星期日 14时05分09秒
-*	Description : push words to the ardrino
-*	              
-**********************************************************/
-unsigned int deamon::AD_down(AD_flag flag, char *data)
-{
-	ar_serial *port = new ar_serial("");
-	unsigned int post_len = 0;
-
-	if (0 == this->ad_len)
-	{
-		return 0;
-	}	
-	post_len = port->post(this->ad_len, (char *)data);
-	if (this->ad_len != post_len)
-		return 0;
-	else
-		return post_len;
-}

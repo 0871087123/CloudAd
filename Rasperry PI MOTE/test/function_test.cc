@@ -45,10 +45,15 @@ TEST(deamon_normal, 001)
 	bool i = false;
 	int ret = 0;
 	jmp_buf tmp_jump_point;
+	char *arglist[2];
+
+	arglist[0] = "work.skyteacher.net";
+	arglist[1] = "/dev/null";
 	memset(&tmp_jump_point, 0, sizeof(tmp_jump_point));
 
 	cont = 1;
-	deamon my_daemon;
+
+	deamon my_daemon(arglist);
 	stub_set(&stru_stub[0], (void *)sleep, (void *)stub_sleep);
 	//stub_set(&stru_stub[1], (void *)my_daemon.connector->exchange, (void *)stub_exchange);
 	//stub_set(&stru_stub[2], (void *)my_daemon.AD_down, (void *)stub_AD_down);
