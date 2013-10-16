@@ -8,7 +8,7 @@
 #用于实际使用时选择arm-linu-g++
 #CC = g++
 #CXX = arm-linux-gnueabihf-g++
-CXXFLAGS = -g
+CXXFLAGS = -g -L./libs/ -I./include/ --static
 
 RasDaemon : dns.o Serial.o main.o function.o
 	$(CXX) $(CXXFLAGS) -o $@ $^

@@ -8,6 +8,7 @@ post your ad to arudino via raspberry pi
 NOTE:
 
 当前阶段：
+重要进度：完成交叉变异实验。serial库交叉编译完成。
 正在重新按照面向对象的编程方法进行实现。目前进行代码结构重构。
 准备迁移打桩工具到google mock。
 实现并测试远端功能。
