@@ -24,3 +24,5 @@ main.o : main.cpp
 clean :
 	rm -rf *.o
 
+distclean :
+	rm -rf *.o RasDaemon
