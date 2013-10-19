@@ -15,6 +15,9 @@ RasDaemon : dns.o Serial.o main.o function.o
 #./libs/libserial.a
 	$(CXX) $(CXXFLAGS) -o $@ $^ -lserial
 
+RasDaemonPC : dns.o Serial.o main.o function.o 
+	g++ -g -o $@ $^ -lserial
+
 dns.o : dns.cpp
 
 Serial.o : Serial.cpp
@@ -27,4 +30,4 @@ clean :
 	rm -rf *.o
 
 distclean :
-	rm -rf *.o RasDaemon
+	rm -rf *.o RasDaemon RasDaemonPC
