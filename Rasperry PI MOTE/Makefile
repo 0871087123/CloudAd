@@ -10,8 +10,10 @@
 #CXX = arm-linux-gnueabihf-g++
 CXXFLAGS = -g -L./libs/ -I./include/ --static
 
-RasDaemon : dns.o Serial.o main.o function.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
+RasDaemon : dns.o Serial.o main.o function.o 
+# also can use static library
+#./libs/libserial.a
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lserial
 
 dns.o : dns.cpp
 
