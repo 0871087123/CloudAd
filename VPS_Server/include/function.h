@@ -31,7 +31,7 @@ class server {
 		/* 启动参数需要一个配置文件以及一个日志文件 */
 		server(char *configfile, char *logfile);
 		~server();
-		log(char *log_string, int log_len);
+		void log(char *log_string, int log_len);
 		/* 使用status控制服务器的开关，当status为0时，释放所有连接并且不接受新连接 */
 		void start(bool status);
 };

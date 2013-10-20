@@ -29,6 +29,9 @@ class stream_manager {
 		/* 最大接入端数量 */
 		int maxevent;
 	public :
+		/* 构造时输入两个超时时间 */
+		stream_manager(int ti, int to);
+		~stream_manager();
 		/* 用于发送数据到接入的客户端 */
 		int exchange(int fd_instance);
 };

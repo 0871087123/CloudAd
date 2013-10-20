@@ -1,0 +1,3 @@
+in_timeout=10
+out_timeout=10
+log=1
