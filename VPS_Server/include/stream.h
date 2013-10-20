@@ -28,6 +28,8 @@ class stream_manager {
 	private :
 		/* 最大接入端数量 */
 		int maxevent;
+		/* 当前要发布的广告 */
+		char pub_info_path[FILE_NAME_LEN];
 	public :
 		/* 构造时输入两个超时时间 */
 		stream_manager(int ti, int to);

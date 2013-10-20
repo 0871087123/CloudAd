@@ -174,6 +174,7 @@ int main(int argc, char *argv[])
 	struct config cfg;
 	int err = 0;
 	pid_t spid = 0;
+	server *server_process = NULL;
 
 	/* 初始化参数结构 */
 	memset(&cfg, 0, sizeof(cfg));
@@ -206,7 +207,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	sleep(5);
+	server_process = new server(cfg.configfile, cfg.logfile);
+	server_process->start(true);
+
 	cout << "Function not realized!" << endl;
 	return 0;
 }

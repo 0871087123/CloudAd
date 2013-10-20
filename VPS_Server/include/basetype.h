@@ -36,6 +36,11 @@ typedef short SHORT;
 #define ___PARAIGNORE
 #endif
 
+#ifndef ___FILENAMELEN
+#define FILE_NAME_LEN 100
+#define ___FILENAMELEN
+#endif
+
 struct tag_pack {
 	USHORT type;
 	USHORT length;
