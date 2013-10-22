@@ -87,6 +87,6 @@ stream_test.o : stream_test.cc $(USER_DIR)/include/stream.h $(GTEST_HEADERS)
 stlv_test.o : stlv_test.cc $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stlv_test.cc
 
-ut : stream.o function.o stream_test.o function_test.o stub.o gtest_main.a
+ut : stream.o function.o stream_test.o function_test.o stlv_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
 	rm -rf *.o
