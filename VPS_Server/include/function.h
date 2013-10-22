@@ -17,18 +17,15 @@
 **********************************************************/
 class server {
 	protected:
-		char data[MAX_DATALEN];
 	private:
 		/* 服务器的流控制器 */
 		stream_manager *controler;
 		/* 服务器的配置文件位置与日志文件位置 */
 		char configfile[FILE_NAME_LEN];
-		char logfile[FILE_NAME_LEN];
 	public:
-		/* 启动参数需要一个配置文件以及一个日志文件 */
-		server(char *configfile, char *logfile);
+		/* 启动参数需要一个配置文件 */
+		server(char *configfile);
 		~server();
-		void log(char *log_string, int log_len);
 		/* 使用status控制服务器的开关，当status为0时，释放所有连接并且不接受新连接 */
 		void start(bool status);
 };

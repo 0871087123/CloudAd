@@ -16,6 +16,7 @@
 #include "include/basetype.h"
 #include "include/stream.h"
 #include "include/function.h"
+#include "include/log.h"
 
 struct config {
 	bool help;
@@ -207,7 +208,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	server_process = new server(cfg.configfile, cfg.logfile);
+	log = new logserver(cfg.logfile, !(cfg.debug));
+	server_process = new server(cfg.configfile);
 	server_process->start(true);
 
 	cout << "Function not realized!" << endl;

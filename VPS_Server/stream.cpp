@@ -50,3 +50,29 @@ int stream_manager::exchange(int fd_instance)
 {
 	return -1;
 }
+
+/*********************************************************
+*	Func Name   : stream_manager::get
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年10月22日 星期二 16时12分41秒
+*	Description : 从文件读取数据
+*	              
+**********************************************************/
+int stream_manager::get(int datalen, char *data)
+{
+	return 0;
+}
+
+/*********************************************************
+*	Func Name   : stream_manager::start
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年10月22日 星期二 16时13分19秒
+*	Description : 控制器启动
+*	              
+**********************************************************/
+void stream_manager::start()
+{
+	return;
+}

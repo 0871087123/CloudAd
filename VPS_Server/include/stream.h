@@ -19,21 +19,28 @@
 **********************************************************/
 class stream_manager {
 	protected :
+		/* 需要发布给客户端的数据 */
+		char data_pub[MAX_DATALEN];
+		int data_len;
 		/* 接入客户端文件描述符集合 */
 		int epoll_set;
+	private :
 		/* 接入时读取请求超时时间 */
 		int timeout_in_sec;
 		/* 发送数据时请求超时时间 */
 		int timeout_out_sec;
-	private :
 		/* 最大接入端数量 */
 		int maxevent;
-		/* 当前要发布的广告 */
-		char pub_info_path[FILE_NAME_LEN];
+		/* 用于发送数据到接入的客户端 */
+		int exchange(int fd_instance);
+		/* 从文件设置流控制器需要发布的数据 */
+		int get(int datalen, char *data);
 	public :
 		/* 构造时输入两个超时时间 */
 		stream_manager(int ti, int to);
 		~stream_manager();
-		/* 用于发送数据到接入的客户端 */
-		int exchange(int fd_instance);
+		/* 流控制器的启动函数 */
+		void start();
+		/* 定义友元类 */
+		friend class server;
 };

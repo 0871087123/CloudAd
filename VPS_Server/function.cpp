@@ -22,12 +22,10 @@
 *	Description : 服务端的构造函数
 *	              
 **********************************************************/
-server::server(char *config, char *log)
+server::server(char *config)
 {
 	/* 初始化所有数据 */
-	memset(this->data, 0, sizeof(this->data));
 	memset(this->configfile, 0, sizeof(this->configfile));
-	memset(this->logfile, 0, sizeof(this->logfile));
 	this->controler = NULL;
 	return;
 }
@@ -43,6 +41,10 @@ server::server(char *config, char *log)
 server::~server()
 {
 	/* 删除流控制器 */
+	if (NULL == this->controler)
+	{
+		return;
+	}
 	delete this->controler;
 	return;
 }

@@ -3,10 +3,10 @@
 # 测试目标：debug
 # 文    件：main.cpp function.cpp stream.cpp
 
-VCloudd : main.cpp function.cpp stream.cpp
+VCloudd : main.cpp function.cpp stream.cpp log.cpp
 	g++ -o $@ $^ --static
 
-debug : main.cpp function.cpp stream.cpp
+debug : main.cpp function.cpp stream.cpp log.cpp
 	g++ -g -D__DEBUG__ -o VCloudd $^
 
 clean :
