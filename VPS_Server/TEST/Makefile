@@ -78,8 +78,14 @@ function.o : $(USER_DIR)/function.cpp $(USER_DIR)/include/function.h $(GTEST_HEA
 stream.o : $(USER_DIR)/stream.cpp $(USER_DIR)/include/stream.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/stream.cpp
 
+log.o : $(USER_DIR)/log.cpp $(USER_DIR)/include/log.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/log.cpp
+
 function_test.o : function_test.cc $(USER_DIR)/include/function.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c function_test.cc
+
+log_test.o : log_test.cc $(USER_DIR)/include/log.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c log_test.cc
 
 stream_test.o : stream_test.cc $(USER_DIR)/include/stream.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stream_test.cc
@@ -87,6 +93,6 @@ stream_test.o : stream_test.cc $(USER_DIR)/include/stream.h $(GTEST_HEADERS)
 stlv_test.o : stlv_test.cc $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c stlv_test.cc
 
-ut : stream.o function.o stream_test.o function_test.o stlv_test.o stub.o gtest_main.a
+ut : log.o stream.o function.o stream_test.o log_test.o function_test.o stlv_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
 	rm -rf *.o

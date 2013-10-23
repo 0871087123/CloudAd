@@ -208,7 +208,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	log = new logserver(cfg.logfile, !(cfg.debug));
+	new logserver(cfg.logfile, !(cfg.debug));
+	LOG("Start Server");
 	server_process = new server(cfg.configfile);
 	server_process->start(true);
 

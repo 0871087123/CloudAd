@@ -8,6 +8,8 @@
 **********************************************************/
 /* 公共头文件 */
 #include <string.h>
+#include <stdio.h>
+#include <error.h>
 
 /* 自有头文件 */
 #include "include/basetype.h"
@@ -25,14 +27,34 @@ logserver *log = NULL;
 **********************************************************/
 logserver::logserver(char *logfile, bool status)
 {
+	FILE *file_p = NULL;
+
 	/* 数据初始化 */
 	memset(this->log_path, 0, FILE_NAME_LEN);
-	this->log_fd = -1;
+	this->log_fd = NULL;
 	this->log_on = false;
 
 	/* 处理输入参数 */
 	this->log_on = status;
+	strcpy(this->log_path, logfile);
 
+	if (true == this->log_on)
+	{
+		/* 打开文件描述符 */
+		file_p = fopen(this->log_path, "a+");
+		if (NULL == file_p)
+		{
+			perror("OPEN LOGFILE:");
+			this->log_on = false;
+		}
+		else
+		{
+			this->log_fd = file_p;
+		}
+	}
+
+	/* 赋值全局变量 */
+	log = this;
 	return;
 }
 
@@ -46,6 +68,12 @@ logserver::logserver(char *logfile, bool status)
 **********************************************************/
 logserver::~logserver()
 {
+	if (true == this->log_on)
+	{
+		fclose(this->log_fd);
+	}
+
+	log = NULL;
 	return;
 }
 
@@ -57,7 +85,15 @@ logserver::~logserver()
 *	Description : 打印日志到文件，或者终端。
 *	              
 **********************************************************/
-void logserver::printlog(char *log, int len)
+void logserver::printlog(char *log)
 {
+	if (true == this->log_on)
+	{
+		fprintf(this->log_fd, log);
+	}
+	else
+	{
+		printf(log);
+	}
 	return;
 }
