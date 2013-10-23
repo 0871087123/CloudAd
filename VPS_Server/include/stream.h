@@ -37,7 +37,7 @@ class stream_manager {
 		/* 用于发送数据到接入的客户端 */
 		int exchange(int fd_instance);
 		/* 从文件设置流控制器需要发布的数据 */
-		int get(int datalen, char *data);
+		int get();
 	public :
 		/* 构造时输入两个超时时间 */
 		stream_manager(int ti, int to, char *path, int epoll_size);

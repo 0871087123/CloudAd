@@ -119,7 +119,7 @@ int stream_manager::exchange(int fd_instance)
 *	Description : 从文件读取数据
 *	              
 **********************************************************/
-int stream_manager::get(int datalen, char *data)
+int stream_manager::get()
 {
 	/* 文件描述符和返回值 */
 	int fd = -1;
@@ -170,15 +170,28 @@ void stream_manager::start()
 	int ret = -1;
 	int sockfd = -1;		/* socket描述符 */
 	int timerfd = -1;		/* 定时器描述符号 */
-	struct epoll_event ev;	/* epoll控制块 */
+	int fd = -1;			/* 当前需要进行io的文件描述符 */
+	socklen_t client_slen = 0;	/* 客户端sock长度 */
+	struct epoll_event ev;	/* socket的epoll */
+	struct epoll_event tmp;	/* 接入客户端的epoll */
 	struct epoll_event *events = (struct epoll_event *)malloc(this->maxevent * sizeof(ev));	/* 接入事件块 */
 	struct sockaddr_in hostaddr;
+	struct sockaddr peer;
+	memset(events, 0, sizeof(events));
 
+	/* 判断是否初始化完整 */
+	if (0 > this->epoll_set)
+	{
+		LOG("EPOLL Init Failed.\n");
+		return;
+	}
+
+	/* 创建socket */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (0 > sockfd)
 	{
 		LOG("SOCKET Create Failed.\n");
-		return;
+		goto __exit;
 	}
 
 	/* 设置IPv4本机地址 */
@@ -191,7 +204,7 @@ void stream_manager::start()
 	{
 		LOG("BIND PORT ERROR.\n");
 		close(sockfd);
-		return;
+		goto __exit;
 	}
 
 	/* 开始监听端口 */
@@ -200,8 +213,97 @@ void stream_manager::start()
 	{
 		LOG("LISTEN Failed.\n");
 		close(sockfd);
-		return;
+		goto __exit;
 	}
 
+	/* 监听端口加入epoll */
+	ev.events = EPOLLIN;
+	ev.data.fd = sockfd;
+	ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, sockfd, &ev);
+	if (0 > ret)
+	{
+		LOG("EPOLL ADD FAILED\n");
+		close(sockfd);
+		goto __exit;
+	}
+
+	/* 主循环 */
+	while (1)
+	{
+		/* 开始等待io */
+		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30);
+		if (0 > fd)
+		{
+			LOG("EPOLL WAIT ERROR.\n");
+			goto __exit;
+		}
+
+		if (sockfd == fd)
+		{
+			/* 接受连接请求，不进行地址过滤等事项 */
+			fd = accept(sockfd, NULL, NULL);
+			if (0 > fd)
+			{
+				LOG("ACCEPT ERROR!\n");
+			}
+			else
+			{
+				/* 监听端口加入epoll */
+				tmp.events = EPOLLIN;
+				tmp.data.fd = fd;
+				ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, fd, &tmp);
+				if (0 > ret)
+				{
+					LOG("CLIENT ADD TO EPOLL FAILED\n");
+					goto __exit;
+				}
+				else
+				{
+					LOG("CLIENT ACCEPT OK.\n");
+				}
+			}
+		}
+		else if (0 == fd)
+		{
+			/* timeout */
+			ret = this->get();
+			if (0 == ret)
+			{
+				LOG("DATA GET FROM FILE OK.\n");
+			}
+		}
+		else if (0 < fd)
+		{
+			/* client data exchange */
+			ret = this->exchange(fd);
+			if (0 == ret)
+			{
+				LOG("CLIENT EXCHANGE DATA OK.\n");
+			}
+			tmp.events = EPOLLIN;
+			tmp.data.fd = fd;
+			ret = epoll_ctl(this->epoll_set, EPOLL_CTL_DEL, fd, &tmp);
+			close(fd);
+			if (0 > ret)
+			{
+				LOG("CLIENT EXIT FAILED.\n");
+				goto __exit;
+			}
+			else
+			{
+				LOG("CLIENT EXIT OK.\n");
+			}
+		}
+		else
+		{
+			/* On ERROR! */
+			LOG("EPOLL WAIT ERROR!\n");
+			goto __exit;
+		}
+	}
+
+__exit:
+	close(this->epoll_set);
+	this->epoll_set = -1;
 	return;
 }
