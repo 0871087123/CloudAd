@@ -19,9 +19,12 @@
 **********************************************************/
 class stream_manager {
 	protected :
-		/* 需要发布给客户端的数据 */
+		/* 需要发布给客户端的数据文件路径（绝对路径） */
+		/* PS:每一定时间重新读取一次 */
+		char data_path[FILE_NAME_LEN];
+		/* 具体数据以及长度 */
 		char data_pub[MAX_DATALEN];
-		int data_len;
+		char data_len;
 		/* 接入客户端文件描述符集合 */
 		int epoll_set;
 	private :
@@ -37,7 +40,7 @@ class stream_manager {
 		int get(int datalen, char *data);
 	public :
 		/* 构造时输入两个超时时间 */
-		stream_manager(int ti, int to);
+		stream_manager(int ti, int to, char *path, int epoll_size);
 		~stream_manager();
 		/* 流控制器的启动函数 */
 		void start();

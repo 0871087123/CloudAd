@@ -85,15 +85,15 @@ logserver::~logserver()
 *	Description : 打印日志到文件，或者终端。
 *	              
 **********************************************************/
-void logserver::printlog(char *log)
+void logserver::printlog(const char *logstring)
 {
 	if (true == this->log_on)
 	{
-		fprintf(this->log_fd, log);
+		fprintf(this->log_fd, logstring);
 	}
 	else
 	{
-		printf(log);
+		printf(logstring);
 	}
 	return;
 }

@@ -7,7 +7,7 @@ VCloudd : main.cpp function.cpp stream.cpp log.cpp
 	g++ -o $@ $^ --static
 
 debug : main.cpp function.cpp stream.cpp log.cpp
-	g++ -g -D__DEBUG__ -o VCloudd $^
+	g++ -g -D__DEBUG__ -Wall -o VCloudd $^
 
 clean :
 	rm -rf VCloudd

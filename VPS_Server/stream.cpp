@@ -7,10 +7,22 @@
 *	              
 **********************************************************/
 /* 系统头文件 */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 /* 自有头文件 */
 #include "include/basetype.h"
 #include "include/stream.h"
+#include "include/log.h"
 
 /*********************************************************
 *	Func Name   : stream_manager::stream_manager
@@ -18,10 +30,28 @@
 *	Author      : Kent
 *	Data        : 2013年10月20日 星期日 15时38分31秒
 *	Description : 构造流处理器。申请epoll等fd。
-*	              
+*	              并且存储数据文件路径。
 **********************************************************/
-stream_manager::stream_manager(int ti, int to)
+stream_manager::stream_manager(int ti, int to, char *path, int epoll_size)
 {
+	int epollfd = -1;
+	this->maxevent = 0;
+
+	this->timeout_in_sec = ti;
+	this->timeout_out_sec = to;
+	strcpy(this->data_path, path);
+
+	epollfd = epoll_create(epoll_size);
+	if (0 > epollfd)
+	{
+		LOG("CREATE EPOLL FAILED\n");
+	}
+	else
+	{
+		this->epoll_set = epollfd;
+		this->maxevent = epoll_size;
+	}
+
 	return;
 }
 
@@ -35,6 +65,11 @@ stream_manager::stream_manager(int ti, int to)
 **********************************************************/
 stream_manager::~stream_manager()
 {
+	if (0 < this->epoll_set)
+	{
+		close(this->epoll_set);
+	}
+
 	return;
 }
 
@@ -44,11 +79,36 @@ stream_manager::~stream_manager()
 *	Author      : Kent
 *	Data        : 2013年10月20日 星期日 15时40分04秒
 *	Description : 用于交换信息
-*	              
+*	              返回0代表操作成功，返回-1代表失败。
 **********************************************************/
 int stream_manager::exchange(int fd_instance)
 {
-	return -1;
+	/* 定义缓冲区 */
+	char buf[MAX_DATALEN] = {0};
+	int ret = 0;
+
+	/* 从客户端读取请求 */
+	ret = read(fd_instance, buf, sizeof(buf));
+	if (0 > ret)
+	{
+		LOG("data Get Error\n");
+		return -1;
+	}
+
+	if (0 != strcmp(buf, "Get"))
+	{
+		LOG("Invalid Client Request.\n");
+		return -1;
+	}
+
+	ret = write(fd_instance, this->data_pub, this->data_len);
+	if (0 > ret)
+	{
+		LOG("data Put Error\n");
+		return -1;
+	}
+
+	return 0;
 }
 
 /*********************************************************
@@ -61,7 +121,40 @@ int stream_manager::exchange(int fd_instance)
 **********************************************************/
 int stream_manager::get(int datalen, char *data)
 {
+	/* 文件描述符和返回值 */
+	int fd = -1;
+	int ret = 0;
+	char buf[MAX_DATALEN] = {0};
+
+	if (0 != access(this->data_path, R_OK))
+	{
+		LOG("Data File can't read.\n");
+		goto __exit;
+	}
+
+	fd = open(this->data_path, O_RDONLY);
+	if (0 > fd)
+	{
+		LOG("File Open Error!\n");
+		goto __exit;
+	}
+
+	ret = read(fd, buf, 32);
+	if (0 >= ret)
+	{
+		LOG("Data File Read Error!\n");
+		goto __exit;
+	}
+	/* 拷贝数据 */
+	memcpy(this->data_pub, buf, ret);
+	this->data_len = ret;
+
+	/* 完成数据从文件获取 */
 	return 0;
+
+/* 出错则返回-1 */
+__exit:
+	return -1;
 }
 
 /*********************************************************
@@ -69,10 +162,46 @@ int stream_manager::get(int datalen, char *data)
 *	Project     : Cloud_AD
 *	Author      : Kent
 *	Data        : 2013年10月22日 星期二 16时13分19秒
-*	Description : 控制器启动
+*	Description : 控制器启动,进行监听，并且持续处理连接
 *	              
 **********************************************************/
 void stream_manager::start()
 {
+	int ret = -1;
+	int sockfd = -1;		/* socket描述符 */
+	int timerfd = -1;		/* 定时器描述符号 */
+	struct epoll_event ev;	/* epoll控制块 */
+	struct epoll_event *events = (struct epoll_event *)malloc(this->maxevent * sizeof(ev));	/* 接入事件块 */
+	struct sockaddr_in hostaddr;
+
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (0 > sockfd)
+	{
+		LOG("SOCKET Create Failed.\n");
+		return;
+	}
+
+	/* 设置IPv4本机地址 */
+	memset(&hostaddr, 0, sizeof(hostaddr));
+	hostaddr.sin_family = AF_INET;
+	hostaddr.sin_port = htons(AD_PORT);
+	/* 绑定socket */
+	ret = bind(sockfd, (struct sockaddr *)&hostaddr, sizeof(hostaddr));
+	if (0 > ret)
+	{
+		LOG("BIND PORT ERROR.\n");
+		close(sockfd);
+		return;
+	}
+
+	/* 开始监听端口 */
+	ret = listen(sockfd, 20);
+	if (0 > ret)
+	{
+		LOG("LISTEN Failed.\n");
+		close(sockfd);
+		return;
+	}
+
 	return;
 }

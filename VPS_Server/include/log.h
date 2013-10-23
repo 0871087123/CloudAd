@@ -28,10 +28,10 @@ class logserver {
 		bool log_on;
 		logserver(char *logfile, bool status);
 		~logserver();
-		void printlog(char *log);
+		void printlog(const char *log);
 };
 
 /* 声明log服务器实例 */
 extern logserver *log;
 /* 简单打印日志的宏 */
-#define LOG(a) log->printlog(a);
+#define LOG(a) log->printlog((const char *)a);
