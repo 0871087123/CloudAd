@@ -18,11 +18,33 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <signal.h>
 
 /* 自有头文件 */
 #include "include/basetype.h"
 #include "include/stream.h"
 #include "include/log.h"
+
+/* 自有状态位 */
+static bool sv_on = false;
+
+/*********************************************************
+*	Func Name   : exit_server
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年10月25日 星期五 16时02分12秒
+*	Description : 
+*	              
+**********************************************************/
+void exit_server(int sig)
+{
+	if (2 == sig)
+	{
+		sv_on = false;
+	}
+
+	return;
+}
 
 /*********************************************************
 *	Func Name   : stream_manager::stream_manager
@@ -41,10 +63,22 @@ stream_manager::stream_manager(int ti, int to, char *path, int epoll_size)
 	this->timeout_out_sec = to;
 	strcpy(this->data_path, path);
 
+	if (NULL == signal(2, exit_server))
+	{
+		LOG("ERROR: SIGNAL HANDLE ERROR\n");
+#ifdef __DEBUG__
+		perror("SIGNAL:");
+#endif
+		return;
+	}
+
 	epollfd = epoll_create(epoll_size);
 	if (0 > epollfd)
 	{
-		LOG("CREATE EPOLL FAILED\n");
+		LOG("ERROR: CREATE EPOLL FAILED\n");
+#ifdef __DEBUG__
+		perror("EPOLL CREATE:");
+#endif
 	}
 	else
 	{
@@ -91,20 +125,20 @@ int stream_manager::exchange(int fd_instance)
 	ret = read(fd_instance, buf, sizeof(buf));
 	if (0 > ret)
 	{
-		LOG("data Get Error\n");
+		LOG("ERROR: data Get Error\n");
 		return -1;
 	}
 
-	if (0 != strcmp(buf, "Get"))
+	if (0 != strcmp(buf, "GET"))
 	{
-		LOG("Invalid Client Request.\n");
+		LOG("ERROR: Invalid Client Request.\n");
 		return -1;
 	}
 
 	ret = write(fd_instance, this->data_pub, this->data_len);
 	if (0 > ret)
 	{
-		LOG("data Put Error\n");
+		LOG("ERROR: data Put Error\n");
 		return -1;
 	}
 
@@ -128,21 +162,21 @@ int stream_manager::get()
 
 	if (0 != access(this->data_path, R_OK))
 	{
-		LOG("Data File can't read.\n");
+		LOG("ERROR: Data File can't read.\n");
 		goto __exit;
 	}
 
 	fd = open(this->data_path, O_RDONLY);
 	if (0 > fd)
 	{
-		LOG("File Open Error!\n");
+		LOG("ERROR: File Open Error!\n");
 		goto __exit;
 	}
 
 	ret = read(fd, buf, 32);
 	if (0 >= ret)
 	{
-		LOG("Data File Read Error!\n");
+		LOG("ERROR: Data File Read Error!\n");
 		goto __exit;
 	}
 	/* 拷贝数据 */
@@ -182,7 +216,7 @@ void stream_manager::start()
 	/* 判断是否初始化完整 */
 	if (0 > this->epoll_set)
 	{
-		LOG("EPOLL Init Failed.\n");
+		LOG("ERROR: EPOLL Init Failed.\n");
 		return;
 	}
 
@@ -190,7 +224,7 @@ void stream_manager::start()
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (0 > sockfd)
 	{
-		LOG("SOCKET Create Failed.\n");
+		LOG("ERROR: SOCKET Create Failed.\n");
 		goto __exit;
 	}
 
@@ -202,7 +236,7 @@ void stream_manager::start()
 	ret = bind(sockfd, (struct sockaddr *)&hostaddr, sizeof(hostaddr));
 	if (0 > ret)
 	{
-		LOG("BIND PORT ERROR.\n");
+		LOG("ERROR: BIND PORT ERROR.\n");
 		close(sockfd);
 		goto __exit;
 	}
@@ -211,7 +245,7 @@ void stream_manager::start()
 	ret = listen(sockfd, 20);
 	if (0 > ret)
 	{
-		LOG("LISTEN Failed.\n");
+		LOG("ERROR: LISTEN Failed.\n");
 		close(sockfd);
 		goto __exit;
 	}
@@ -222,19 +256,31 @@ void stream_manager::start()
 	ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, sockfd, &ev);
 	if (0 > ret)
 	{
-		LOG("EPOLL ADD FAILED\n");
+		LOG("ERROR: EPOLL ADD FAILED\n");
+#ifdef __DEBUG__
+		perror("ADD EPOLL:");
+#endif
 		close(sockfd);
 		goto __exit;
 	}
 
 	/* 主循环 */
+	sv_on = true;
 	while (1)
 	{
+		/* 检查是否需要进行退出操作 */
+		if (true != sv_on)
+		{
+			close(sockfd);
+			LOG("SERVER Received signal, now exiting.\n");
+			this->~stream_manager();
+		}
+
 		/* 开始等待io */
 		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30);
 		if (0 > fd)
 		{
-			LOG("EPOLL WAIT ERROR.\n");
+			LOG("ERROR: EPOLL WAIT ERROR.\n");
 			goto __exit;
 		}
 
@@ -244,7 +290,7 @@ void stream_manager::start()
 			fd = accept(sockfd, NULL, NULL);
 			if (0 > fd)
 			{
-				LOG("ACCEPT ERROR!\n");
+				LOG("ERROR: ACCEPT ERROR!\n");
 			}
 			else
 			{
@@ -254,7 +300,7 @@ void stream_manager::start()
 				ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, fd, &tmp);
 				if (0 > ret)
 				{
-					LOG("CLIENT ADD TO EPOLL FAILED\n");
+					LOG("ERROR: CLIENT ADD TO EPOLL FAILED\n");
 					goto __exit;
 				}
 				else
@@ -286,7 +332,7 @@ void stream_manager::start()
 			close(fd);
 			if (0 > ret)
 			{
-				LOG("CLIENT EXIT FAILED.\n");
+				LOG("ERROR: CLIENT EXIT FAILED.\n");
 				goto __exit;
 			}
 			else
@@ -297,7 +343,7 @@ void stream_manager::start()
 		else
 		{
 			/* On ERROR! */
-			LOG("EPOLL WAIT ERROR!\n");
+			LOG("ERROR: EPOLL WAIT ERROR!\n");
 			goto __exit;
 		}
 	}

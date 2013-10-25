@@ -213,6 +213,6 @@ int main(int argc, char *argv[])
 	server_process = new server(cfg.configfile);
 	server_process->start(true);
 
-	cout << "Function not realized!" << endl;
+	LOG("SERVER TERMINATED");
 	return 0;
 }

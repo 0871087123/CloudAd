@@ -20,10 +20,10 @@ GTEST_DIR = /home/kent/gtest
 USER_DIR = ..
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include -D__UT__
+CPPFLAGS += -I$(GTEST_DIR)/include -D__UT__ -D__DEBUG__
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -D__UT__
+CXXFLAGS += -g -Wall -Wextra -D__UT__ -D__DEBUG__
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
