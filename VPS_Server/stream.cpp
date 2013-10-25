@@ -63,7 +63,7 @@ stream_manager::stream_manager(int ti, int to, char *path, int epoll_size)
 	this->timeout_out_sec = to;
 	strcpy(this->data_path, path);
 
-	if (NULL == signal(2, exit_server))
+	if (SIG_ERR == signal(2, exit_server))
 	{
 		LOG("ERROR: SIGNAL HANDLE ERROR\n");
 #ifdef __DEBUG__
@@ -129,7 +129,7 @@ int stream_manager::exchange(int fd_instance)
 		return -1;
 	}
 
-	if (0 != strcmp(buf, "GET"))
+	if (0 != strncmp(buf, "GET", 3))
 	{
 		LOG("ERROR: Invalid Client Request.\n");
 		return -1;
@@ -277,7 +277,7 @@ void stream_manager::start()
 		}
 
 		/* 开始等待io */
-		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30);
+		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30000);
 		if (0 > fd)
 		{
 			LOG("ERROR: EPOLL WAIT ERROR.\n");

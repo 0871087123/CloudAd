@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 
@@ -84,7 +85,7 @@ TEST(stream_manager, 001)
 	{
 		/* 主进程中创建客户端进行操作 */
 		/* 等待服务器启动，估计需要时间10秒 */
-		sleep(10);
+		sleep(5);
 
 		/* 单客户端连接并操作 */
 		serveradd.sin_family = AF_INET;
@@ -99,5 +100,6 @@ TEST(stream_manager, 001)
 		EXPECT_TRUE(0 == strcmp(buf1, "test info"));
 
 		EXPECT_TRUE(0 == kill(serv, 2));
+		EXPECT_TRUE(serv == wait(&ret));
 	}
 }
