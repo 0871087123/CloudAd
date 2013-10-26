@@ -4,10 +4,10 @@
 # 文    件：main.cpp function.cpp stream.cpp
 
 VCloudd : main.cpp function.cpp stream.cpp log.cpp
-	g++ -o $@ $^ --static
+	g++ -D__NOBLOCK__ -o $@ $^ --static 
 
 debug : main.cpp function.cpp stream.cpp log.cpp
-	g++ -g -D__DEBUG__ -Wall -o VCloudd $^
+	g++ -g -D__NOBLOCK__ -D__DEBUG__ -Wall -o VCloudd $^
 
 clean :
 	rm -rf VCloudd

@@ -29,6 +29,20 @@
 static bool sv_on = false;
 
 /*********************************************************
+*	Func Name   : setnoblock
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年10月26日 星期六 15时00分51秒
+*	Description : 设置客户端io为非阻塞io
+*	              
+**********************************************************/
+int setnoblock(int fd_instance)
+{
+	return fcntl(fd_instance, F_SETFL, O_NONBLOCK);
+}
+
+
+/*********************************************************
 *	Func Name   : exit_server
 *	Project     : Cloud_AD
 *	Author      : Kent
@@ -120,6 +134,13 @@ int stream_manager::exchange(int fd_instance)
 	/* 定义缓冲区 */
 	char buf[MAX_DATALEN] = {0};
 	int ret = 0;
+#ifdef __NOBLOCK__
+	ret = setnoblock(fd_instance);
+	if (0 > ret)
+	{
+		LOG("Set No Block Error.\n");
+	}
+#endif
 
 #ifdef __DEBUG__
 	printf("IO FD:%d\n", fd_instance);
@@ -129,7 +150,7 @@ int stream_manager::exchange(int fd_instance)
 	ret = read(fd_instance, buf, sizeof(buf));
 	if (0 > ret)
 	{
-		LOG("ERROR: data Get Error\n");
+		LOG("ERROR: data READ Error\n");
 		return -1;
 	}
 
@@ -209,6 +230,7 @@ __exit:
 void stream_manager::start()
 {
 	int n = 0;
+	int on = 1;
 	int ret = -1;
 	int sockfd = -1;		/* socket描述符 */
 	int timerfd = -1;		/* 定时器描述符号 */
@@ -228,11 +250,17 @@ void stream_manager::start()
 		return;
 	}
 
-	/* 创建socket */
+	/* 创建socket，并且进行端口重用 */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (0 > sockfd)
 	{
 		LOG("ERROR: SOCKET Create Failed.\n");
+		goto __exit;
+	}
+	ret = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	if (0 > ret)
+	{
+		LOG("REUSE ADDR AND PORT ERROR.\n");
 		goto __exit;
 	}
 
@@ -245,6 +273,9 @@ void stream_manager::start()
 	if (0 > ret)
 	{
 		LOG("ERROR: BIND PORT ERROR.\n");
+#ifdef __DEBUG__
+		perror("BIND:");
+#endif
 		close(sockfd);
 		goto __exit;
 	}
