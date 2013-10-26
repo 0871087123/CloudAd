@@ -234,14 +234,11 @@ void stream_manager::start()
 	int on = 1;
 	int ret = -1;
 	int sockfd = -1;		/* socket描述符 */
-	int timerfd = -1;		/* 定时器描述符号 */
 	int fd = -1;			/* 当前需要进行io的文件描述符 */
-	socklen_t client_slen = 0;	/* 客户端sock长度 */
 	struct epoll_event ev;	/* socket的epoll */
 	struct epoll_event tmp;	/* 接入客户端的epoll */
 	struct epoll_event *events = (struct epoll_event *)malloc(this->maxevent * sizeof(ev));	/* 接入事件块 */
 	struct sockaddr_in hostaddr;
-	struct sockaddr peer;
 	memset(events, 0, sizeof(events));
 
 	/* 判断是否初始化完整 */
@@ -400,7 +397,6 @@ __epoll_wait:
 					printf("Client Event:%d", events[n].events);
 					printf("Is Client HUP? :%d\n", events[n].events & EPOLLHUP);
 #endif
-					goto __exit;
 				}
 				else
 				{

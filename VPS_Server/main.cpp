@@ -84,7 +84,6 @@ bool param_is_valid(struct config *cfg)
 int parse_param(int argc, char *argv[], struct config *cfg)
 {
 	int i = 0;
-	int err = 0;
 	int ret = 0;
 
 	if (argc > 1)
@@ -209,10 +208,10 @@ int main(int argc, char *argv[])
 	}
 
 	new logserver(cfg.logfile, !(cfg.debug));
-	LOG("Start Server");
+	LOG("Start Server\n");
 	server_process = new server(cfg.configfile);
 	server_process->start();
 
-	LOG("SERVER TERMINATED");
+	LOG("SERVER TERMINATED\n");
 	return 0;
 }

@@ -87,9 +87,17 @@ logserver::~logserver()
 **********************************************************/
 void logserver::printlog(const char *logstring)
 {
+	int ret = 0;
 	if (true == this->log_on)
 	{
 		fprintf(this->log_fd, logstring);
+		ret = fflush(this->log_fd);
+#ifdef __DEBUG__
+		if (0 > ret)
+		{
+			perror("Flush File Stream:");
+		}
+#endif
 	}
 	else
 	{

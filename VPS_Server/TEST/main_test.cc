@@ -146,6 +146,7 @@ TEST(main_test, 003)
 	close(sockfd1);
 
 	/* 再次连接操作 */
+	memset(buf1, 0, sizeof(buf1));
 	serveradd.sin_family = AF_INET;
 	serveradd.sin_port = htons(AD_PORT);
 	ret = inet_pton(AF_INET, SERVERADDR, &(serveradd.sin_addr));
