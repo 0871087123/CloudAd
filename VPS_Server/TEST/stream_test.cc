@@ -97,9 +97,9 @@ TEST(stream_manager, 001)
 		ASSERT_TRUE(0 == connect(sockfd1, (struct sockaddr *)&serveradd, sizeof(sockaddr)));
 		EXPECT_TRUE(0 < write(sockfd1, "GET", 4));
 		EXPECT_TRUE(0 < read(sockfd1, buf1, MAX_DATALEN));
-		EXPECT_TRUE(0 == strcmp(buf1, "test info"));
+		EXPECT_TRUE(0 == strncmp(buf1, "test info", 9));
 
-		EXPECT_TRUE(0 == kill(serv, 2));
+		EXPECT_TRUE(0 == kill(serv, 63));
 		EXPECT_TRUE(serv == wait(&ret));
 	}
 }

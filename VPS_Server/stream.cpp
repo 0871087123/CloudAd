@@ -33,12 +33,12 @@ static bool sv_on = false;
 *	Project     : Cloud_AD
 *	Author      : Kent
 *	Data        : 2013年10月25日 星期五 16时02分12秒
-*	Description : 
+*	Description : 接收信号退出服务器
 *	              
 **********************************************************/
 void exit_server(int sig)
 {
-	if (2 == sig)
+	if ((SIGRTMAX - 1) == sig)
 	{
 		sv_on = false;
 	}
@@ -63,7 +63,7 @@ stream_manager::stream_manager(int ti, int to, char *path, int epoll_size)
 	this->timeout_out_sec = to;
 	strcpy(this->data_path, path);
 
-	if (SIG_ERR == signal(2, exit_server))
+	if (SIG_ERR == signal(SIGRTMAX - 1, exit_server))
 	{
 		LOG("ERROR: SIGNAL HANDLE ERROR\n");
 #ifdef __DEBUG__
@@ -121,6 +121,10 @@ int stream_manager::exchange(int fd_instance)
 	char buf[MAX_DATALEN] = {0};
 	int ret = 0;
 
+#ifdef __DEBUG__
+	printf("IO FD:%d\n", fd_instance);
+#endif
+
 	/* 从客户端读取请求 */
 	ret = read(fd_instance, buf, sizeof(buf));
 	if (0 > ret)
@@ -132,6 +136,9 @@ int stream_manager::exchange(int fd_instance)
 	if (0 != strncmp(buf, "GET", 3))
 	{
 		LOG("ERROR: Invalid Client Request.\n");
+#ifdef __DEBUG__
+		printf("%d %d %d\n", buf[0], buf[1], buf[2]);
+#endif
 		return -1;
 	}
 
@@ -201,6 +208,7 @@ __exit:
 **********************************************************/
 void stream_manager::start()
 {
+	int n = 0;
 	int ret = -1;
 	int sockfd = -1;		/* socket描述符 */
 	int timerfd = -1;		/* 定时器描述符号 */
@@ -265,51 +273,43 @@ void stream_manager::start()
 	}
 
 	/* 主循环 */
+	/* 获取一次数据 */
 	sv_on = true;
+	ret = this->get();
+	if (0 == ret)
+	{
+		LOG("DATA GET FROM FILE OK.\n");
+	}
+
 	while (1)
 	{
+__epoll_wait:
 		/* 检查是否需要进行退出操作 */
 		if (true != sv_on)
 		{
 			close(sockfd);
 			LOG("SERVER Received signal, now exiting.\n");
 			this->~stream_manager();
+			return;
 		}
 
 		/* 开始等待io */
 		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30000);
 		if (0 > fd)
 		{
+			close(sockfd);
 			LOG("ERROR: EPOLL WAIT ERROR.\n");
+#ifdef __DEBUG__
+			perror("EPOLL WAIT:");
+#endif
 			goto __exit;
 		}
-
-		if (sockfd == fd)
-		{
-			/* 接受连接请求，不进行地址过滤等事项 */
-			fd = accept(sockfd, NULL, NULL);
-			if (0 > fd)
-			{
-				LOG("ERROR: ACCEPT ERROR!\n");
-			}
-			else
-			{
-				/* 监听端口加入epoll */
-				tmp.events = EPOLLIN;
-				tmp.data.fd = fd;
-				ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, fd, &tmp);
-				if (0 > ret)
-				{
-					LOG("ERROR: CLIENT ADD TO EPOLL FAILED\n");
-					goto __exit;
-				}
-				else
-				{
-					LOG("CLIENT ACCEPT OK.\n");
-				}
-			}
-		}
-		else if (0 == fd)
+#ifdef __DEBUG__
+		printf("fds epoll in : %d\n", fd);
+		printf("sockfd is:%d\n", sockfd);
+		printf("epoll_set is : %d\n", this->epoll_set);
+#endif
+		if (0 == fd)
 		{
 			/* timeout */
 			ret = this->get();
@@ -317,35 +317,62 @@ void stream_manager::start()
 			{
 				LOG("DATA GET FROM FILE OK.\n");
 			}
+			goto __epoll_wait;
 		}
-		else if (0 < fd)
+
+		for(n = 0; n < this->maxevent; n++)
 		{
-			/* client data exchange */
-			ret = this->exchange(fd);
-			if (0 == ret)
+			fd = events[n].data.fd;
+			if (sockfd == fd)
 			{
-				LOG("CLIENT EXCHANGE DATA OK.\n");
+				/* 接受连接请求，不进行地址过滤等事项 */
+				fd = accept(sockfd, NULL, NULL);
+				if (0 > fd)
+				{
+					LOG("ERROR: ACCEPT ERROR!\n");
+				}
+				else
+				{
+					/* 监听端口加入epoll */
+					tmp.events = EPOLLIN;
+					tmp.data.fd = fd;
+					ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, fd, &tmp);
+					if (0 > ret)
+					{
+						LOG("ERROR: CLIENT ADD TO EPOLL FAILED\n");
+						goto __exit;
+					}
+					else
+					{
+						LOG("CLIENT ACCEPT OK.\n");
+					}
+				}
 			}
-			tmp.events = EPOLLIN;
-			tmp.data.fd = fd;
-			ret = epoll_ctl(this->epoll_set, EPOLL_CTL_DEL, fd, &tmp);
-			close(fd);
-			if (0 > ret)
+			else if (0 < fd)
 			{
-				LOG("ERROR: CLIENT EXIT FAILED.\n");
-				goto __exit;
-			}
-			else
-			{
-				LOG("CLIENT EXIT OK.\n");
+				/* client data exchange */
+				ret = this->exchange(fd);
+				if (0 == ret)
+				{
+					LOG("CLIENT EXCHANGE DATA OK.\n");
+				}
+				tmp.events = EPOLLIN;
+				tmp.data.fd = fd;
+				ret = epoll_ctl(this->epoll_set, EPOLL_CTL_DEL, fd, &tmp);
+				close(fd);
+				if (0 > ret)
+				{
+					LOG("ERROR: CLIENT EXIT FAILED.\n");
+					goto __exit;
+				}
+				else
+				{
+					LOG("CLIENT EXIT OK.\n");
+				}
 			}
 		}
-		else
-		{
-			/* On ERROR! */
-			LOG("ERROR: EPOLL WAIT ERROR!\n");
-			goto __exit;
-		}
+
+		LOG("EPOLL WAIT OK.\n");
 	}
 
 __exit:
