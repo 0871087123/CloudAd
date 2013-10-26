@@ -144,6 +144,7 @@ int stream_manager::exchange(int fd_instance)
 
 #ifdef __DEBUG__
 	printf("IO FD:%d\n", fd_instance);
+	perror("SetNoBlock:\n");
 #endif
 
 	/* 从客户端读取请求 */
@@ -394,6 +395,11 @@ __epoll_wait:
 				if (0 > ret)
 				{
 					LOG("ERROR: CLIENT EXIT FAILED.\n");
+#ifdef __DEBUG__
+					perror("Client Exit:");
+					printf("Client Event:%d", events[n].events);
+					printf("Is Client HUP? :%d\n", events[n].events & EPOLLHUP);
+#endif
 					goto __exit;
 				}
 				else

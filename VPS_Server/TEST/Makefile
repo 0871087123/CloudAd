@@ -27,7 +27,7 @@ CXXFLAGS += -g -Wall -Wextra -D__UT__ -D__DEBUG__ -D__NOBLOCK__
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = ut
+TESTS = ut main_test
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -96,3 +96,6 @@ stlv_test.o : stlv_test.cc $(GTEST_HEADERS)
 ut : log.o stream.o function.o stream_test.o log_test.o function_test.o stlv_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
 	rm -rf *.o
+
+main_test : main_test.cc gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread

@@ -26,6 +26,6 @@ class server {
 		/* 启动参数需要一个配置文件 */
 		server(char *configfile);
 		~server();
-		/* 使用status控制服务器的开关，当status为0时，释放所有连接并且不接受新连接 */
-		void start(bool status);
+		/* 使用status控制服务器的开关 */
+		void start();
 };

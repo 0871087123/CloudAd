@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 	new logserver(cfg.logfile, !(cfg.debug));
 	LOG("Start Server");
 	server_process = new server(cfg.configfile);
-	server_process->start(true);
+	server_process->start();
 
 	LOG("SERVER TERMINATED");
 	return 0;
