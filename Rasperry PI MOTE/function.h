@@ -17,6 +17,7 @@
 class deamon
 {
 	private:
+		int loop_time;							/* 循环操作的间隔时间 */
 		UCHAR advertise[ADSIZE];				/* 用于保存post信息 */
 		char serial_name[PORTNAME_LEN];			/* 当前串口位置 */
 		char server_name[SERVER_NAME_LEN];		/* 当前使用的服务器名 */

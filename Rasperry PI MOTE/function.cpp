@@ -6,29 +6,18 @@
 *	Description : This file contain main loop of ths deamon
 *	              process
 **********************************************************/
+/* 系统头文件 */
 #include <iostream>
-#include "basetype.h"
-#include "dns.h"
-#include "Serial.h"
-#include "function.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 
-typedef enum tagErrorNum {
-	E_INVALID = 0,
-	E_ACQINFO,
-	E_DOWN,
-	E_BUTT,
-}ERRORNUM;
-
-char *ERRORSTR[] = 
-{
-	"",		/* E_INVALID */
-	"Can't acquire information\n",				/* E_ACQINFO */
-	"Can't tranfer information to arduino",		/* E_DOWN */
-	"",		/* E_BUTT */
-};
+/* 自有头文件 */
+#include "basetype.h"
+#include "dns.h"
+#include "Serial.h"
+#include "function.h"
+#include "log.h"
 
 /*********************************************************
 *	Func Name   : deamon::deamon
@@ -89,36 +78,16 @@ deamon::~deamon()
 **********************************************************/
 void deamon::startdeamon()
 {
-	ERRORNUM error_code = E_INVALID;
+	LOG("Start Loop Processing.\n");
 
-	while(1){
-		sleep(100);
-		try {
-			while (1)
-			{
-				if (0 == this->acquire())
-				{
-					throw E_ACQINFO;
-				}
-				if (0 == this->lcd_downloader->post(flag_print, (char *)this->advertise))
-				{
-					throw E_DOWN;
-				}
-			}
-		}
-
-		catch (ERRORNUM error_code){
-			if (error_code < E_BUTT)
-			{
-				printf("%s : %s", "Error in process", ERRORSTR[error_code]);
-			}
-			else
-			{
-				printf("Error string load faild.\n");
-			}
-		}
+	while(1)
+	{
+		sleep(this->loop_time);
+		this->acquire();
+		this->lcd_downloader->post(flag_print, (char *)this->advertise);
 	}
 
+	return;
 }
 
 /*********************************************************
@@ -133,15 +102,17 @@ unsigned long deamon::acquire()
 {
 	rasp_connector *connector = this->connector;
 	unsigned int result = false;
-	strncpy((char *)this->advertise, "Get AD", sizeof(this->advertise));
+	strncpy((char *)this->advertise, "GET", sizeof(this->advertise));
 	result = connector->exchange(this->server_name, this->advertise, sizeof(this->advertise));
 
 	if (0 == result)
 	{
+		LOG("WARN : Can't get Data from server.\n");
 		this->ad_len = 0;
 	}
 	else
 	{
+		LOG("Get Data from server OK.\n");
 		this->ad_len = result;
 	}
 

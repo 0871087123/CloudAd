@@ -8,7 +8,7 @@ post your ad to arudino via raspberry pi
 NOTE:
 
 当前阶段：
-正在重新按照面向对象的编程方法进行实现。目前进行代码结构重构。
+对树莓派端进行代码重构，并且对其功能进行实现。
 准备迁移打桩工具到google mock。
 实现并测试远端功能。
 编写终端守护进程。CS架构程序设计。

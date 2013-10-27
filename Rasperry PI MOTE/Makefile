@@ -10,13 +10,15 @@
 #CXX = arm-linux-gnueabihf-g++
 CXXFLAGS = -g -L./libs/ -I./include/ --static
 
-RasDaemon : dns.o Serial.o main.o function.o 
+RasDaemon : dns.o Serial.o main.o function.o log.o
 # also can use static library
 #./libs/libserial.a
 	$(CXX) $(CXXFLAGS) -o $@ $^ -lserial
+	rm -rf *.o
 
-RasDaemonPC : dns.o Serial.o main.o function.o 
-	g++ -g -o $@ $^ -lserial
+debug : dns.cpp Serial.cpp main.cpp function.cpp log.cpp
+	g++ -g -D__DEBUG__ -o RasDaemon $^ -lserial
+	rm -rf *.o
 
 dns.o : dns.cpp
 
@@ -24,10 +26,9 @@ Serial.o : Serial.cpp
 
 function.o : function.cpp
 
+log.o : log.cpp
+
 main.o : main.cpp
 
 clean :
-	rm -rf *.o
-
-distclean :
-	rm -rf *.o RasDaemon RasDaemonPC
+	rm -rf *.o RasDaemon
