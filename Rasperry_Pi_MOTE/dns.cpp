@@ -1,9 +1,5 @@
+/* 系统头文件 */
 #include <iostream>
-#include "basetype.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -14,12 +10,12 @@ extern "C" {
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
-#ifdef __cplusplus
-}
-#endif
-
+/* 自有头文件 */
+#include "basetype.h"
 #include "dns.h"
+#include "log.h"
 
 STATIC struct timeval timeout;
 
@@ -37,7 +33,7 @@ rasp_connector::rasp_connector()
 	this->wired = false;
 	this->domainname[0] = '\0';
 
-	timeout.tv_sec = 40;
+	timeout.tv_sec = 10;
 	return;
 }
 
@@ -75,7 +71,10 @@ void rasp_connector::wireto(const CHAR *hostname)
 	host = gethostbyname(hostname);
 
 	if ((host == NULL) || (host->h_addrtype != AF_INET))
+	{
+		LOG("ERROR: Host Not Found.\n");
 		return;
+	}
 
 	while (host->h_addr_list[i] != NULL)
 	i++;
@@ -83,33 +82,42 @@ void rasp_connector::wireto(const CHAR *hostname)
 	if (i > 0)
 	{
 		addr.sin_family = AF_INET;
-		addr.sin_port = AD_PORT;
+		addr.sin_port = htons(AD_PORT);
 		memcpy(&(addr.sin_addr.s_addr), host->h_addr_list[i - 1], sizeof(addr.sin_addr.s_addr));
 	}
 	else 
 	{
-		//error , do nothing
+#ifdef __DEBUG__
 		perror("HOST NAME:");
+#endif
 		return ;
 	}
 
 	s_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (s_fd < 0)
 	{
-		//error , do nothing
+		LOG("ERROR: Socket Create Failed.\n");
+#ifdef __DEBUG__
 		perror("SOCKET:");
+#endif
 		return ;
 	}
 
 	if (setsockopt(s_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)))
 	{
+		LOG("ERROR: Set Timeout Failed.\n");
+#ifdef __DEBUG__
 		perror("sockopt:SNTO");
+#endif
 		return;
 	}
 
 	if (setsockopt(s_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)))
 	{
+		LOG("ERROR: Set Timeout Fialed.\n");
+#ifdef __DEBUG__
 		perror("sockopt:RDTO");
+#endif
 		return;
 	}
 
@@ -117,7 +125,10 @@ void rasp_connector::wireto(const CHAR *hostname)
 
 	if (0 != connect(this->fd_sock, sockaddr, sizeof(sockaddr_in)))
 	{
+		LOG("ERROR: Connect to server Failed.\n");
+#ifdef __DEBUG__
 		perror("CONNECT:");
+#endif
 		this->fd_sock = -1;
 		return;
 	}
@@ -135,7 +146,7 @@ void rasp_connector::wireto(const CHAR *hostname)
 *	Description : send messages
 *	              
 **********************************************************/
-ULONG rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
+ULONG rasp_connector::TX(char *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
 		return 0;
@@ -152,7 +163,7 @@ ULONG rasp_connector::TX(UCHAR *buffer, ULONG bufsize)
 *	Description : receive messages
 *	              
 **********************************************************/
-ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
+ULONG rasp_connector::RX(char *buffer, ULONG bufsize)
 {
 	if (true != this->wired)
 		return 0;
@@ -168,7 +179,7 @@ ULONG rasp_connector::RX(UCHAR *buffer, ULONG bufsize)
 *	Description : exchange cloud ad with server, return 
 *	              length of received adverstise
 **********************************************************/
-unsigned int rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsize)
+unsigned int rasp_connector::exchange(char *hostname, char *buffer, ULONG bufsize)
 {
 	unsigned int length;
 
@@ -184,16 +195,24 @@ unsigned int rasp_connector::exchange(CHAR *hostname, UCHAR *buffer, ULONG bufsi
 		return false;
 	}
 
-	length = this->TX(buffer, bufsize);
-	if (length <= 0)
+	/* 暂时这样处理 */
+	length = this->TX(buffer, strlen(buffer));
+	if (0 >= length)
 	{
+		LOG("ERROR: write Failed.\n");
+#ifdef __DEBUG__
 		perror("TX:");
+#endif
 		return 0;
 	}
 
 	length = this->RX(buffer, bufsize);
+	if (0 >= length)
 	{
+		LOG("ERROR: Read Failed.\n");
+#ifdef __DEBUG__
 		perror("RX:");
+#endif
 		return 0;
 	}
 

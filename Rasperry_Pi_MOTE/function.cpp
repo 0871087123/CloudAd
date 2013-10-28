@@ -28,8 +28,7 @@
 *	              in raspberry pi mod，输入一个参数，第一个
 *	              为服务器名，第二个为本地串口路径
 **********************************************************/
-using namespace std;
-deamon::deamon(char *arglist[])
+deamon::deamon(int loop, char *serial, char *server)
 {
 	/* 数据初始化 */
 	this->ad_len = 0;
@@ -38,12 +37,20 @@ deamon::deamon(char *arglist[])
 	memset(this->serial_name, 0, PORTNAME_LEN);
 
 	/* 存储配置数据 */
-	strcpy(this->server_name, arglist[0]);
-	strcpy(this->serial_name, arglist[1]);
+	strcpy(this->server_name, server);
+	strcpy(this->serial_name, serial);
+	this->loop_time = loop;
 
 	/* 创建各种连接 */
 	this->connector = new rasp_connector();
-	this->lcd_downloader = new arduino_lcd(arglist[1]);
+	this->lcd_downloader = new arduino_lcd(serial);
+
+#ifdef __DEBUG__
+	using namespace std;
+	cout << "Loop time: " << this->loop_time << endl;
+	cout << "serial port :" << this->serial_name << endl;
+	cout << "Server Name :" << this->server_name << endl;
+#endif
 
 	return;
 }
@@ -76,7 +83,7 @@ deamon::~deamon()
 *	Description : 启动守护进程
 *	              
 **********************************************************/
-void deamon::startdeamon()
+void deamon::start()
 {
 	LOG("Start Loop Processing.\n");
 
@@ -102,7 +109,7 @@ unsigned long deamon::acquire()
 {
 	rasp_connector *connector = this->connector;
 	unsigned int result = false;
-	strncpy((char *)this->advertise, "GET", sizeof(this->advertise));
+	strncpy(this->advertise, "GET", sizeof(this->advertise));
 	result = connector->exchange(this->server_name, this->advertise, sizeof(this->advertise));
 
 	if (0 == result)

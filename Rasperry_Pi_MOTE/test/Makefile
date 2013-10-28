@@ -20,10 +20,10 @@ GTEST_DIR = /home/kent/gtest
 USER_DIR = ..
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include -D__UT__
+CPPFLAGS += -I$(GTEST_DIR)/include -D__UT__ -D__DEBUG__
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -D__UT__
+CXXFLAGS += -g -Wall -Wextra -D__UT__ -D__DEBUG__
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -81,6 +81,9 @@ Serial.o : $(USER_DIR)/Serial.cpp $(USER_DIR)/Serial.h $(GTEST_HEADERS)
 dns.o : $(USER_DIR)/dns.cpp $(USER_DIR)/dns.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/dns.cpp
 
+log.o : $(USER_DIR)/log.cpp $(USER_DIR)/log.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/log.cpp
+
 function_test.o : function_test.cc $(USER_DIR)/function.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c function_test.cc
 
@@ -90,5 +93,6 @@ dns_test.o : dns_test.cc $(USER_DIR)/dns.h $(GTEST_HEADERS)
 Serial_test.o : Serial_test.cc $(USER_DIR)/Serial.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Serial_test.cc
 
-ut : dns.o function.o Serial.o dns_test.o function_test.o Serial_test.o stub.o gtest_main.a
+ut : dns.o function.o Serial.o log.o dns_test.o function_test.o Serial_test.o stub.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
+	rm -rf *.o

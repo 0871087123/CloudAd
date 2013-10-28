@@ -26,6 +26,7 @@ extern int connect(int sockfd,const struct sockaddr *addr, socklen_t addrlen);
 #endif
 
 #include "../dns.h"
+#include "../log.h"
 
 char address_p[20];
 //need to be stub
@@ -67,6 +68,7 @@ void UT_DNS::TearDown()
 TEST_F(UT_DNS, 001)
 {
 	rasp_connector myrasp;
+	logserver mylog("Null", false);
 	//检查初始化
 	EXPECT_EQ(-1, myrasp.fd_sock);
 	EXPECT_TRUE(false == myrasp.wired);
@@ -82,4 +84,31 @@ TEST_F(UT_DNS, 001)
 	close(myrasp.fd_sock);
 }
 
-//void stub_socket;
+
+/*********************************************************
+*	Test ID     : DNS_002
+*	Project     : Cloud_AD
+*	Author      : Kent
+*	Data        : 2013年10月28日 星期一 15时32分08秒
+*	Description : 与已经部署完成的服务器进行搭配测试。
+*	              
+**********************************************************/
+TEST(DNS, 002)
+{
+	rasp_connector myrasp;
+	logserver mylog("Null", false);
+	int ret = -1;
+	char buf[MAX_DATALEN] = {0};
+	//检查初始化
+	EXPECT_EQ(-1, myrasp.fd_sock);
+	EXPECT_TRUE(false == myrasp.wired);
+
+
+	/* 进行数据通信测试 */
+	strcpy(buf, "GET");
+	ret = myrasp.exchange("kent.skyteacher.net", buf, MAX_DATALEN);
+	EXPECT_TRUE(0 < ret);
+	EXPECT_TRUE(0 == strncmp(buf, "test info", 9));
+
+	return;
+}

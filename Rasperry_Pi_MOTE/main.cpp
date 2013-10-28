@@ -11,6 +11,7 @@
 #include "dns.h"
 #include "Serial.h"
 #include "function.h"
+#include "log.h"
 
 struct config {
 	bool help;
@@ -223,6 +224,8 @@ int main(int argc, char *argv[])
 	cout << cfg.serialport << endl;
 	cout << cfg.logfile << endl;
 #endif
+	logserver log(cfg.logfile, !(cfg.debug));
+
 	cout << "Function Not Realized." << endl;
 	return 0;
 }
