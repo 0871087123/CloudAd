@@ -43,4 +43,5 @@ TEST(deamon_normal, 001)
 	cout << "Then press Y/N to check this test" << endl;
 	check = getchar();
 	EXPECT_TRUE(('Y' == check) || ('y' == check));
+	getchar();
 }

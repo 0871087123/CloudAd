@@ -16,6 +16,8 @@ typedef enum tag_Flag {
 } AD_flag;
 
 class arduino_lcd{
+	private :
+		char portname[FILE_NAME_LEN];
 	public :
 		arduino_lcd(char *Port_name);
 		~arduino_lcd();

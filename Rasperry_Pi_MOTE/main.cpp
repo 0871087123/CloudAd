@@ -16,6 +16,7 @@
 struct config {
 	bool help;
 	bool debug;
+	int loop_time;
 	char server[MAX_DATALEN];
 	char serialport[MAX_DATALEN];
 	char logfile[MAX_DATALEN];
@@ -32,9 +33,10 @@ struct config {
 void printhelp()
 {
 	using namespace std;
-	cout << "Use like : RasDaemon -debug -server=kent.skyteacher.net -port=/dev/ttyACM0 -logfile=./log\n" \
+	cout << "Use like : RasDaemon -debug -server=kent.skyteacher.net -freq=10 -port=/dev/ttyACM0 -logfile=./log\n" \
 		 <<	"\t-debug : run as a consol process , will not create daemon process.\n"\
 		 <<	"\t-server=YOUR_SERVER\n"\
+		 << "\t-freq=YOUR_LOOP_TIME\n"\
 		 << "\t-port=YOUR_SERIALPORT_PATH\n"\
 		 << "\t-logfile=YOUR_LOG_PATH\n"\
 		 <<	"thank you for using this software.\n";
@@ -119,6 +121,18 @@ int parse_param(int argc, char *argv[], struct config *cfg)
 								goto __exit;
 							}
 						}; break;
+					case 'f' :
+						{
+							ret = 0;
+							if (0 == strncmp(argv[i], "-freq=", 6))
+							{
+								ret = sscanf(argv[i], "-freq=%d", &(cfg->loop_time));
+							}
+							if (0 >= ret)
+							{
+								goto __exit;
+							}
+						}; break;
 					case 'p' :
 						{
 							ret = 0;
@@ -187,9 +201,13 @@ int main(int argc, char *argv[])
 	struct config cfg;
 	int err = 0;
 	pid_t spid = 0;
+	deamon *myserver = NULL;
 
 	/* 初始化参数结构 */
 	memset(&cfg, 0, sizeof(cfg));
+	cfg.debug = false;
+	cfg.help = false;
+	cfg.loop_time = 10;
 
 	/* 解析参数 */
 	err = parse_param(argc, argv, &cfg);
@@ -224,8 +242,12 @@ int main(int argc, char *argv[])
 	cout << cfg.serialport << endl;
 	cout << cfg.logfile << endl;
 #endif
-	logserver log(cfg.logfile, !(cfg.debug));
+	/* 日志 */
+	logserver mylog(cfg.logfile, !(cfg.debug));
+	/* 主循环 */
+	LOG("Start Function\n");
+	myserver = new deamon(cfg.loop_time, cfg.serialport, cfg.server);
+	myserver->start();
 
-	cout << "Function Not Realized." << endl;
 	return 0;
 }

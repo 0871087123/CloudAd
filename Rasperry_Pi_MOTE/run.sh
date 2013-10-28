@@ -1,1 +1,1 @@
-./RasDaemon -debug -server=host -port=/dev/tty -logfile=./log/log
+./RasDaemon -server=kent.skyteacher.net -freq=5 -port=/dev/ttyACM0 -logfile=./log/log

@@ -49,5 +49,7 @@ int main()
 
 	myport.Close();
 
+	sleep(10);
+
 	return 0;
 }

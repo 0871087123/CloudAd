@@ -91,7 +91,12 @@ void deamon::start()
 	{
 		sleep(this->loop_time);
 		this->acquire();
-		this->lcd_downloader->post(flag_print, (char *)this->advertise);
+		/* 去除尾0 */
+		if (0 == this->advertise[this->ad_len])
+		{
+			this->ad_len -= 1;
+		}
+		this->lcd_downloader->post(this->ad_len, (char *)this->advertise);
 	}
 
 	return;

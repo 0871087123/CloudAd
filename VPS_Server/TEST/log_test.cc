@@ -52,6 +52,11 @@ static int stub_fclose(FILE *stream)
 	return 0;
 }
 
+static int stub_fflush(FILE *stream)
+{
+	return 0;
+}
+
 /*********************************************************
 *	Test ID     : logserver_001
 *	Project     : Cloud_AD
@@ -63,12 +68,13 @@ static int stub_fclose(FILE *stream)
 TEST(logserver, 001)
 {
 	int ret;
-	fun_stub test[4];
+	fun_stub test[5];
 
 	stub_set(&test[0], (void *)fopen, (void *)stub_fopen);
 	stub_set(&test[1], (void *)fclose, (void *)stub_fclose);
 	stub_set(&test[2], (void *)fprintf, (void *)stub_fprintf);
 	stub_set(&test[3], (void *)printf, (void *)stub_printf);
+	stub_set(&test[4], (void *)fflush, (void *)stub_fflush);
 
 	logserver *testlog = new logserver("./log", true);
 	EXPECT_TRUE(0 == strcmp("./log", logpath));
@@ -82,6 +88,7 @@ TEST(logserver, 001)
 	stub_reset(&test[1]);
 	stub_reset(&test[2]);
 	stub_reset(&test[3]);
+	stub_reset(&test[4]);
 }
 
 /*********************************************************
@@ -95,7 +102,7 @@ TEST(logserver, 001)
 TEST(logserver, 002)
 {
 	/* 初始化数据 */
-	fun_stub test[4];
+	fun_stub test[5];
 	logtofile = false;
 	logstr = data;
 	memset(logpath, 0, sizeof(logpath));
@@ -106,6 +113,7 @@ TEST(logserver, 002)
 	stub_set(&test[1], (void *)fclose, (void *)stub_fclose);
 	stub_set(&test[2], (void *)fprintf, (void *)stub_fprintf);
 	stub_set(&test[3], (void *)printf, (void *)stub_printf);
+	stub_set(&test[4], (void *)fflush, (void *)stub_fflush);
 
 	logserver *testlog = new logserver("test", false);
 	LOG("testlogserver");
@@ -119,4 +127,5 @@ TEST(logserver, 002)
 	stub_reset(&test[1]);
 	stub_reset(&test[2]);
 	stub_reset(&test[3]);
+	stub_reset(&test[4]);
 }

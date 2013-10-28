@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/timerfd.h>
 
 /* 自有头文件 */
 #include "include/basetype.h"
@@ -235,10 +236,15 @@ void stream_manager::start()
 	int ret = -1;
 	int sockfd = -1;		/* socket描述符 */
 	int fd = -1;			/* 当前需要进行io的文件描述符 */
+	int timerfd = -1;		/* 定时器描述符 */
 	struct epoll_event ev;	/* socket的epoll */
 	struct epoll_event tmp;	/* 接入客户端的epoll */
 	struct epoll_event *events = (struct epoll_event *)malloc(this->maxevent * sizeof(ev));	/* 接入事件块 */
 	struct sockaddr_in hostaddr;
+	struct itimerspec standard;
+	struct itimerspec tmval;
+	memset(&standard, 0, sizeof(standard));
+	memset(&tmval, 0, sizeof(tmval));
 	memset(events, 0, sizeof(events));
 
 	/* 判断是否初始化完整 */
@@ -310,6 +316,41 @@ void stream_manager::start()
 		LOG("DATA GET FROM FILE OK.\n");
 	}
 
+	/* 创建定时器 */
+	timerfd = timerfd_create(CLOCK_REALTIME, 0);
+	if (0 > timerfd)
+	{
+		LOG("ERROR: Timer fd create failed.\n");
+		goto __exit;
+	}
+	standard.it_interval.tv_sec = this->timeout_in_sec;
+	standard.it_value.tv_sec = this->timeout_in_sec;
+	memcpy(&tmval, &standard, sizeof(tmval));
+	if (0 >
+			timerfd_settime(timerfd, 0, &tmval, NULL))
+	{
+		LOG("ERROR: Timer Set failed.\n");
+	}
+	/* 定时器加入epoll */
+	memset(&tmp, 0, sizeof(tmp));
+	tmp.events = EPOLLIN | EPOLLET;
+	tmp.data.fd = timerfd;
+	ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, timerfd, &tmp);
+	if (0 > ret)
+	{
+		LOG("ERROR: EPOLL ADD timer FAILED\n");
+#ifdef __DEBUG__
+		perror("ADD timer:");
+#endif
+		close(sockfd);
+		goto __exit;
+	}
+	LOG("Timer is Ready\n");
+#ifdef __DEBUG__
+	printf("Time is %d\n", tmval.it_interval.tv_sec);
+#endif
+
+
 	while (1)
 	{
 __epoll_wait:
@@ -323,7 +364,7 @@ __epoll_wait:
 		}
 
 		/* 开始等待io */
-		fd = epoll_wait(this->epoll_set, events, this->maxevent, 30000);
+		fd = epoll_wait(this->epoll_set, events, this->maxevent, -1);
 		if (0 > fd)
 		{
 			close(sockfd);
@@ -333,22 +374,13 @@ __epoll_wait:
 #endif
 			goto __exit;
 		}
+
 #ifdef __DEBUG__
 		printf("fds epoll in : %d\n", fd);
 		printf("sockfd is:%d\n", sockfd);
 		printf("epoll_set is : %d\n", this->epoll_set);
 #endif
-		if (0 == fd)
-		{
-			/* timeout */
-			ret = this->get();
-			if (0 == ret)
-			{
-				LOG("DATA GET FROM FILE OK.\n");
-			}
-			goto __epoll_wait;
-		}
-
+		/* 循环处理各种事件 */
 		for(n = 0; n < this->maxevent; n++)
 		{
 			fd = events[n].data.fd;
@@ -363,6 +395,7 @@ __epoll_wait:
 				else
 				{
 					/* 监听端口加入epoll */
+					memset(&tmp, 0, sizeof(tmp));
 					tmp.events = EPOLLIN;
 					tmp.data.fd = fd;
 					ret = epoll_ctl(this->epoll_set, EPOLL_CTL_ADD, fd, &tmp);
@@ -376,6 +409,21 @@ __epoll_wait:
 						LOG("CLIENT ACCEPT OK.\n");
 					}
 				}
+			}
+			else if (fd == timerfd)
+			{
+				ret = this->get();
+				if (0 == ret)
+				{
+					LOG("DATA GET FROM FILE OK.\n");
+				}
+				memcpy(&tmval, &standard, sizeof(tmval));
+				if (0 >
+						timerfd_settime(timerfd, 0, &tmval, NULL))
+				{
+					LOG("ERROR: Timer Reset failed.\n");
+				}
+				goto __epoll_wait;
 			}
 			else if (0 < fd)
 			{
@@ -409,6 +457,7 @@ __epoll_wait:
 	}
 
 __exit:
+	close(timerfd);
 	close(this->epoll_set);
 	this->epoll_set = -1;
 	return;

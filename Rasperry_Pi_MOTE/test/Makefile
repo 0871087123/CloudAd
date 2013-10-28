@@ -94,5 +94,5 @@ Serial_test.o : Serial_test.cc $(USER_DIR)/Serial.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c Serial_test.cc
 
 ut : dns.o function.o Serial.o log.o dns_test.o function_test.o Serial_test.o stub.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lpthread
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lserial -lpthread
 	rm -rf *.o
